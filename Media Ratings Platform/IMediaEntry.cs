@@ -6,13 +6,27 @@ using System.Threading.Tasks;
 
 namespace Media_Ratings_Platform
 {
-    internal interface IMediaEntry
+    /*
+     A media entry:
+        - represents either a movie, series, or game
+        - consists of title, description, media type, release year, genre(s), and age restriction
+        - is created by a user and can only be edited or deleted by its creator
+        - includes a list of ratings and a calculated average score
+        - can be marked as favorite by other users
+    */
+
+    // TODO: Constructor
+    public enum Genres
     {
-        string Title { get; set; }
-        string Description { get; set; }
-        string MediaType { get; set; }
+        // TODO
+    }
+    public interface IMediaEntry
+    {
+        String Title { get; set; }
+        String Description { get; set; }
+        String MediaType { get; set; }
         DateTime ReleaseYear { get; set; }
-        string Genres { get; set; }
+        Genres Genres { get; set; }
         int AgeRestriction { get; set; }
     }
 }
