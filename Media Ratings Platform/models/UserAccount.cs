@@ -121,7 +121,7 @@ namespace Media_Ratings_Platform.models
 
         public IEnumerable<UserRating> GetRatingHistory()
         {
-            return Ratings.OrderByDescending(r => r.Timestamp);
+            return Ratings.OrderByDescending(r => r.RatingTimestamp);
         }
 
         /* 
