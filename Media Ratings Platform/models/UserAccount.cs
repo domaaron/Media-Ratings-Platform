@@ -29,12 +29,47 @@ namespace Media_Ratings_Platform.models
         public Guid UserId { get; private set; } = Guid.NewGuid();
         public string Username { get; set; }
         public string Password { get; set; }
+
         // media created by own user
         public List<IMediaEntry> MediaEntries { get; private set; } = new List<IMediaEntry> { };
-        public List<UserRating> Rating { get; private set; } = new List<UserRating> { };
-
-        // no duplicate values
+        // ratings created by own user
+        public List<UserRating> Ratings { get; private set; } = new List<UserRating> { };
+        // favourites, no duplicate values
         public HashSet<IMediaEntry> Favorites { get; private set; } = new HashSet<IMediaEntry>();
+
+        /* 
+         * ======================================
+         * media management
+         * ======================================
+        */
+        public void AddMediaEntry(IMediaEntry mediaEntry)
+        {
+            if (!MediaEntries.Contains(mediaEntry))
+            {
+                MediaEntries.Add(mediaEntry);
+            }
+        }
+
+        public void RemoveMediaEntry(IMediaEntry mediaEntry)
+        {
+            MediaEntries.Remove(mediaEntry);
+            Favorites.Remove(mediaEntry);
+        }
+
+        public void UpdateMediaEntry(IMediaEntry oldEntry, IMediaEntry newEntry)
+        {
+            int index = MediaEntries.IndexOf(oldEntry);
+            if (index >= 0)
+            {
+                MediaEntries[index] = newEntry;
+            }
+        }
+
+        /* 
+         * ======================================
+         * favourites
+         * ======================================
+        */
         public void AddFavorite(IMediaEntry mediaEntry)
         {
             Favorites.Add(mediaEntry);
@@ -45,34 +80,78 @@ namespace Media_Ratings_Platform.models
             Favorites.Remove(mediaEntry);
         }
 
-        public void AddMediaEntry(IMediaEntry mediaEntry)
+        /* 
+         * ======================================
+         * ratings
+         * ======================================
+        */
+        public UserRating AddRating(UserRating rating)
         {
-            MediaEntries.Add(mediaEntry);
-        }
+            if (rating.StarValue < 1 || rating.StarValue > 5)
+            {
+                throw new ArgumentOutOfRangeException("Invalid rating: Stars must be between 1 and 5.");
+            }
 
-        public void RemoveMediaEntry(IMediaEntry mediaEntry)
-        {
-            MediaEntries.Remove(mediaEntry);
-        }
-
-        public void AddRating(UserRating rating)
-        {
-            Rating.Add(rating);
+            Ratings.Add(rating);
+            return rating;
         }
 
         public void RemoveRating(UserRating rating)
         {
-            Rating.Remove(rating);
+            Ratings.Remove(rating);
+        }
+
+        public bool LikeRating(UserRating rating)
+        {
+            // cannot like own rating
+            if (rating.User == this)
+            {
+                return false;
+            }
+
+            // cannot like twice the same rating
+            if (rating.LikedBy.Contains(this.UserId))
+            {
+                return false;
+            }
+
+            rating.LikedBy.Add(this.UserId);
+            return true;
+        }
+
+        public IEnumerable<UserRating> GetRatingHistory()
+        {
+            return Ratings.OrderByDescending(r => r.Timestamp);
+        }
+
+        /* 
+         * ======================================
+         * statistics
+         * ======================================
+        */
+        public double AverageRatingGiven()
+        {
+            if (!Ratings.Any())
+            {
+                return 0;
+            }
+
+            return Ratings.Average(r => r.StarValue);
         }
 
         public int TotalFavorites()
         {
-            return MediaEntries.Count;
+            return Favorites.Count;
         }
 
         public int TotalMediaEntries()
         {
             return MediaEntries.Count;
+        }
+
+        public int TotalRatings()
+        {
+            return Ratings.Count;
         }
     }
 }
