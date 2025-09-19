@@ -19,7 +19,8 @@ namespace Media_Ratings_Platform
     {
         Action,
         Adventure,
-        Comedy = 2,
+        Animation,
+        Comedy,
         Drama,
         Horror,
         SciFi,
