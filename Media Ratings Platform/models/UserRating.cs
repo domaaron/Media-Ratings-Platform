@@ -17,13 +17,13 @@ namespace Media_Ratings_Platform.models
     */
     public class UserRating
     {
-        public UserRating(IMediaEntry mediaEntry, UserAccount user, int starValue, string? comment, DateTime timestamp)
+        public UserRating(IMediaEntry mediaEntry, UserAccount user, int starValue, string? comment)
         {
             MediaEntry = mediaEntry;
             User = user;
             StarValue = starValue;
             Comment = comment;
-            Timestamp = timestamp;
+            RatingTimestamp = DateTime.Now;
         }
 
         public Guid RatingId { get; private set; } = Guid.NewGuid();
@@ -31,7 +31,7 @@ namespace Media_Ratings_Platform.models
         public UserAccount User { get; private set; }
         public int StarValue { get; private set; }
         public string? Comment { get; private set; }
-        public DateTime Timestamp { get; private set; }
+        public DateTime RatingTimestamp { get; private set; }
         public bool IsConfirmed { get; private set; } = false;
 
         // likes from other users
@@ -42,8 +42,13 @@ namespace Media_Ratings_Platform.models
             IsConfirmed = true;
         }
 
-        public void EditRating(int newStars, string? newComment)
+        public void EditRating(UserAccount user, int newStars, string? newComment)
         {
+            if (user != User)
+            {
+                throw new UnauthorizedAccessException("You can only edit your own ratings.");
+            }
+
             if (newStars < 1 || newStars > 5)
             {
                 throw new ArgumentOutOfRangeException("Stars´must be between 1 and 5.");
@@ -51,8 +56,7 @@ namespace Media_Ratings_Platform.models
 
             StarValue = newStars;
             Comment = newComment;
-            Timestamp = DateTime.Now;
-            // needs a new confirmation
+            RatingTimestamp = DateTime.Now;
             IsConfirmed = false;
         }
 
