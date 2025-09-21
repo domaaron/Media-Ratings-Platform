@@ -53,7 +53,6 @@ namespace MediaRatings.Domain
         public void RemoveMediaEntry(IMediaEntry mediaEntry)
         {
             MediaEntries.Remove(mediaEntry);
-            Favorites.Remove(mediaEntry);
         }
 
         public void UpdateMediaEntry(IMediaEntry oldEntry, IMediaEntry newEntry)
@@ -85,7 +84,7 @@ namespace MediaRatings.Domain
          * ratings
          * ======================================
         */
-        public UserRating AddRating(UserRating rating)
+        public void AddRating(UserRating rating)
         {
             if (rating.StarValue < 1 || rating.StarValue > 5)
             {
@@ -93,7 +92,6 @@ namespace MediaRatings.Domain
             }
 
             Ratings.Add(rating);
-            return rating;
         }
 
         public void RemoveRating(UserRating rating)
