@@ -3,9 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36414.22
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Media Ratings Platform.Application", "Media Ratings Platform\Media Ratings Platform.Application.csproj", "{0997A1AC-A88D-4955-BB76-718E472F15FE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediaRatings.Application", "Media Ratings Platform\MediaRatings.Application.csproj", "{0997A1AC-A88D-4955-BB76-718E472F15FE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Media Ratings Platform.Test", "Media Ratings Platform.Test\Media Ratings Platform.Test.csproj", "{1D71701B-3ACC-481B-827D-4D8CFDA3F3A5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediaRatings.Test", "Media Ratings Platform.Test\MediaRatings.Test.csproj", "{1D71701B-3ACC-481B-827D-4D8CFDA3F3A5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediaRatings.Domain", "MediaRating.Domain\MediaRatings.Domain.csproj", "{5F6279B8-FEE0-4104-B0CA-E198A6984F32}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediaRatings.Infrastructure", "MediaRating.Infrastructure\MediaRatings.Infrastructure.csproj", "{62BBCDA6-E3E7-423C-9A6A-E3BC4198256D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediaRatings.Api", "MediaRating.Api\MediaRatings.Api.csproj", "{7A9ACD5B-4488-42FC-A1E3-C444199B6517}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +27,18 @@ Global
 		{1D71701B-3ACC-481B-827D-4D8CFDA3F3A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1D71701B-3ACC-481B-827D-4D8CFDA3F3A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1D71701B-3ACC-481B-827D-4D8CFDA3F3A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F6279B8-FEE0-4104-B0CA-E198A6984F32}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F6279B8-FEE0-4104-B0CA-E198A6984F32}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F6279B8-FEE0-4104-B0CA-E198A6984F32}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F6279B8-FEE0-4104-B0CA-E198A6984F32}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62BBCDA6-E3E7-423C-9A6A-E3BC4198256D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62BBCDA6-E3E7-423C-9A6A-E3BC4198256D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62BBCDA6-E3E7-423C-9A6A-E3BC4198256D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62BBCDA6-E3E7-423C-9A6A-E3BC4198256D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A9ACD5B-4488-42FC-A1E3-C444199B6517}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A9ACD5B-4488-42FC-A1E3-C444199B6517}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A9ACD5B-4488-42FC-A1E3-C444199B6517}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A9ACD5B-4488-42FC-A1E3-C444199B6517}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

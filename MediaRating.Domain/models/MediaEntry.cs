@@ -1,4 +1,6 @@
-﻿namespace Media_Ratings_Platform.models
+﻿
+
+namespace MediaRatings.Domain
 {
     public abstract class MediaEntry : IMediaEntry
     {

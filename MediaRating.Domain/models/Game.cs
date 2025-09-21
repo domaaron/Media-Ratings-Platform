@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Media_Ratings_Platform.models
+namespace MediaRatings.Domain
 {
     public class Game : MediaEntry
     {

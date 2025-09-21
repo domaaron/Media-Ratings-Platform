@@ -1,4 +1,4 @@
-using Media_Ratings_Platform.models;
+using MediaRatings.Domain;
 
 namespace Media_Ratings_Platform.Test
 {

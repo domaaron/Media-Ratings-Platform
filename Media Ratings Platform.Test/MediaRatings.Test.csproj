@@ -18,7 +18,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Media Ratings Platform\Media Ratings Platform.Application.csproj" />
+    <ProjectReference Include="..\Media Ratings Platform\MediaRatings.Application.csproj" />
+    <ProjectReference Include="..\MediaRating.Domain\MediaRatings.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>

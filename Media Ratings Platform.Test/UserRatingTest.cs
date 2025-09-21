@@ -1,4 +1,5 @@
-﻿using Media_Ratings_Platform.models;
+﻿
+using MediaRatings.Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
