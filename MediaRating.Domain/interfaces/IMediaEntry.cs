@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Media_Ratings_Platform
+namespace MediaRatings.Domain
 {
     /*
      A media entry:
@@ -15,18 +15,35 @@ namespace Media_Ratings_Platform
         - can be marked as favorite by other users
     */
 
-    // TODO: Constructor
     public enum Genres
     {
-        // TODO
+        Action,
+        Adventure,
+        Animation,
+        Comedy,
+        Drama,
+        Horror,
+        SciFi,
+        Fantasy,
+        Thriller,
+        Documentary,
+        Romance
     }
+       
+    public enum MediaType
+    {
+        Movie,
+        Series,
+        Game
+    }
+
     public interface IMediaEntry
     {
-        String Title { get; set; }
-        String Description { get; set; }
-        String MediaType { get; set; }
-        DateTime ReleaseYear { get; set; }
-        Genres Genres { get; set; }
+        string Title { get; set; }
+        string Description { get; set; }
+        MediaType MediaType { get; }
+        int ReleaseYear { get; set; }
+        List<Genres> Genres { get; set; }
         int AgeRestriction { get; set; }
     }
 }
