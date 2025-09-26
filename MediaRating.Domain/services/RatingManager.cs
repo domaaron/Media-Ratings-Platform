@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MediaRatings.Domain.interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MediaRatings.Domain.services
 {
-    public class RatingManager
+    public class RatingManager : IRatingManager
     {
         // ratings created by own user
         private readonly List<UserRating> _ratings = new();

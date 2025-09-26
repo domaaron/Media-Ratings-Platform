@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MediaRatings.Domain.interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MediaRatings.Domain.services
 {
-    public class FavoritesManager
+    public class FavoritesManager : IFavoritesManager
     {
         // favorites, no duplicate values
         private readonly HashSet<IMediaEntry> _favorites = new();

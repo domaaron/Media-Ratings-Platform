@@ -1,4 +1,5 @@
-﻿using MediaRatings.Domain.services;
+﻿using MediaRatings.Domain.interfaces;
+using MediaRatings.Domain.services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,14 +22,13 @@ namespace MediaRatings.Domain
     */
     public class UserAccount
     {
-        public UserAccount(string username, string password)
+        public UserAccount(string username, string password, IMediaManager mediaManager, IFavoritesManager favoritesManager, IRatingManager ratingManager)
         {
             Username = username;
             Password = password;
-
-            MediaManager = new MediaManager();
-            FavoritesManager = new FavoritesManager();
-            RatingManager = new RatingManager(this);
+            MediaManager = mediaManager;
+            FavoritesManager = favoritesManager;
+            RatingManager = ratingManager;
         }
 
         public Guid UserId { get; private set; } = Guid.NewGuid();
@@ -36,8 +36,8 @@ namespace MediaRatings.Domain
         public string Password { get; set; }
 
         // services
-        public MediaManager MediaManager { get; private set; }
-        public FavoritesManager FavoritesManager { get; private set; }
-        public RatingManager RatingManager { get; private set; }
+        public IMediaManager MediaManager { get; private set; }
+        public IFavoritesManager FavoritesManager { get; private set; }
+        public IRatingManager RatingManager { get; private set; }
     }
 }
