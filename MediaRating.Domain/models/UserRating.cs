@@ -33,6 +33,7 @@ namespace MediaRatings.Domain
         public string? Comment { get; private set; }
         public DateTime RatingTimestamp { get; private set; }
         public bool IsConfirmed { get; private set; } = false;
+        public bool IsDeleted { get; private set; }
 
         // likes from other users
         public HashSet<Guid> LikedBy { get; private set; } = new HashSet<Guid>();
@@ -60,16 +61,28 @@ namespace MediaRatings.Domain
             IsConfirmed = false;
         }
 
-        public void DeleteRating()
+        public void DeleteRating(UserAccount user)
         {
+            if (user != User)
+            {
+                throw new UnauthorizedAccessException("You can only delete your own ratings.");
+            }
+
+            IsDeleted = true;
             Comment = null;
             StarValue = 0;
             IsConfirmed = false;
         }
 
-        public void AddLike(Guid userId)
+        public bool AddLike(Guid userId)
         {
+            if (LikedBy.Contains(userId))
+            {
+                return false;
+            }
+
             LikedBy.Add(userId);
+            return true;
         }
 
         public void RemoveLike(Guid userId)
