@@ -22,10 +22,10 @@ namespace Media_Ratings_Platform.Test
                 new List<Genres> { Genres.Animation, Genres.Comedy },
                 6
             );
-            user.AddMediaEntry(movie);
+            user.MediaManager.AddMediaEntry(movie);
 
-            Assert.Contains(movie, user.MediaEntries);
-            Assert.Equal(1, user.TotalMediaEntries());
+            Assert.Contains(movie, user.MediaManager.GetAllMediaEntries());
+            Assert.Equal(1, user.MediaManager.CountMediaEntries());
         }
 
         [Fact]
@@ -39,11 +39,11 @@ namespace Media_Ratings_Platform.Test
                 new List<Genres> { Genres.Animation, Genres.Comedy },
                 6
             );
-            user.AddMediaEntry(movie);
-            user.RemoveMediaEntry(movie);
+            user.MediaManager.AddMediaEntry(movie);
+            user.MediaManager.RemoveMediaEntry(movie);
 
-            Assert.DoesNotContain(movie, user.MediaEntries);
-            Assert.Equal(0, user.TotalMediaEntries());
+            Assert.DoesNotContain(movie, user.MediaManager.GetAllMediaEntries());
+            Assert.Equal(0, user.MediaManager.CountMediaEntries());
         }
 
         [Fact]
@@ -57,10 +57,10 @@ namespace Media_Ratings_Platform.Test
                 new List<Genres> { Genres.Animation, Genres.Comedy },
                 6
             );
-            user.AddFavorite(movie);
+            user.FavoritesManager.AddFavorite(movie);
 
-            Assert.Contains(movie, user.Favorites);
-            Assert.Equal(1, user.TotalFavorites());
+            Assert.Contains(movie, user.FavoritesManager.GetAllFavorites());
+            Assert.Equal(1, user.FavoritesManager.CountFavorites());
         }
 
         [Fact]
@@ -74,11 +74,11 @@ namespace Media_Ratings_Platform.Test
                 new List<Genres> { Genres.Animation, Genres.Comedy },
                 6
             );
-            user.AddFavorite(movie);
-            user.RemoveFavorite(movie);
+            user.FavoritesManager.AddFavorite(movie);
+            user.FavoritesManager.RemoveFavorite(movie);
 
-            Assert.DoesNotContain(movie, user.Favorites);
-            Assert.Equal(0, user.TotalFavorites());
+            Assert.DoesNotContain(movie, user.FavoritesManager.GetAllFavorites());
+            Assert.Equal(0, user.FavoritesManager.CountFavorites());
         }
 
         [Fact]
@@ -93,10 +93,10 @@ namespace Media_Ratings_Platform.Test
                 6
             );
             var rating = new UserRating(movie, user, 5, "Can recommend");
-            user.AddRating(rating);
+            user.RatingManager.AddRating(rating);
 
-            Assert.Contains(user.Ratings, r => r.MediaEntry == movie);
-            Assert.Equal(1, user.TotalRatings());
+            Assert.Contains(user.RatingManager.GetAllRatings(), r => r.MediaEntry == movie);
+            Assert.Equal(1, user.RatingManager.CountRatings());
         }
 
         [Fact]
@@ -111,11 +111,11 @@ namespace Media_Ratings_Platform.Test
                 6
             );
             var rating = new UserRating(movie, user, 5, "Can recommend");
-            user.AddRating(rating);
-            user.RemoveRating(rating);
+            user.RatingManager.AddRating(rating);
+            user.RatingManager.RemoveRating(rating);
 
-            Assert.DoesNotContain(user.Ratings, r => r.MediaEntry == movie);
-            Assert.Equal(0, user.TotalRatings());
+            Assert.DoesNotContain(user.RatingManager.GetAllRatings(), r => r.MediaEntry == movie);
+            Assert.Equal(0, user.RatingManager.CountRatings());
         }
 
         [Fact]
@@ -131,9 +131,9 @@ namespace Media_Ratings_Platform.Test
                 6
             );
             var rating = new UserRating(movie, otherUser, 5, "Can recommend");
-            otherUser.AddRating(rating);
+            otherUser.RatingManager.AddRating(rating);
 
-            Assert.True(user.LikeRating(rating));
+            Assert.True(user.RatingManager.LikeRating(rating, user));
         }
 
         [Fact]
@@ -148,9 +148,9 @@ namespace Media_Ratings_Platform.Test
                 6
             );
             var rating = new UserRating(movie, user, 5, "Can recommend");
-            user.AddRating(rating);
+            user.RatingManager.AddRating(rating);
 
-            Assert.False(user.LikeRating(rating));
+            Assert.False(user.RatingManager.LikeRating(rating, user));
         }
 
         [Fact]
@@ -166,11 +166,11 @@ namespace Media_Ratings_Platform.Test
                 6
             );
             var rating = new UserRating(movie, otherUser, 5, "Can recommend");
-            otherUser.AddRating(rating);
+            otherUser.RatingManager.AddRating(rating);
 
-            user.LikeRating(rating);
+            user.RatingManager.LikeRating(rating, user);
 
-            Assert.False(user.LikeRating(rating));
+            Assert.False(user.RatingManager.LikeRating(rating, user));
         }
     }
 }

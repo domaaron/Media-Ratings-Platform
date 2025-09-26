@@ -75,7 +75,7 @@ namespace Media_Ratings_Platform.Test
                 6
             );
             var rating = new UserRating(movie, user, 5, "Nice");
-            rating.DeleteRating();
+            rating.DeleteRating(user);
 
             Assert.Equal(0, rating.StarValue);
             Assert.Null(rating.Comment);
