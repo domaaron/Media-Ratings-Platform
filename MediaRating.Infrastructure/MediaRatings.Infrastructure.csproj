@@ -11,4 +11,13 @@
     <Folder Include="repositories\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Isopoh.Cryptography.Argon2" Version="2.0.0" />
+    <PackageReference Include="Npgsql" Version="9.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MediaRating.Domain\MediaRatings.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -11,4 +11,10 @@
     <Folder Include="controllers\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Media Ratings Platform\MediaRatings.Application.csproj" />
+    <ProjectReference Include="..\MediaRating.Domain\MediaRatings.Domain.csproj" />
+    <ProjectReference Include="..\MediaRating.Infrastructure\MediaRatings.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>
