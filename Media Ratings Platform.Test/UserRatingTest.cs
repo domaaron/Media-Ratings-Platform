@@ -1,10 +1,7 @@
-﻿
-using MediaRatings.Domain;
+﻿using MediaRatings.Domain;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Xunit;
 
 namespace Media_Ratings_Platform.Test
 {
@@ -13,8 +10,9 @@ namespace Media_Ratings_Platform.Test
         [Fact]
         public void ConfirmRatingSuccessTest()
         {
-            var user = new UserAccount("Max", "test");
+            var user = new UserAccount("Max", "test", null!, null!, null!);
             var movie = new Movie(
+                user.UserId,
                 "Cars",
                 "It's about cars.",
                 2006,
@@ -30,8 +28,9 @@ namespace Media_Ratings_Platform.Test
         [Fact]
         public void EditRatingSuccessTest()
         {
-            var user = new UserAccount("Max", "test");
+            var user = new UserAccount("Max", "test", null!, null!, null!);
             var movie = new Movie(
+                user.UserId,
                 "Cars",
                 "It's about cars.",
                 2006,
@@ -48,9 +47,10 @@ namespace Media_Ratings_Platform.Test
         [Fact]
         public void EditRatingFailTest()
         {
-            var user = new UserAccount("Max", "test");
-            var otherUser = new UserAccount("Alice", "test");
+            var user = new UserAccount("Max", "test", null!, null!, null!);
+            var otherUser = new UserAccount("Alice", "test", null!, null!, null!);
             var movie = new Movie(
+                user.UserId,
                 "Cars",
                 "It's about cars.",
                 2006,
@@ -65,9 +65,9 @@ namespace Media_Ratings_Platform.Test
         [Fact]
         public void DeleteRatingSuccessTest()
         {
-            var user = new UserAccount("Max", "test");
-            var otherUser = new UserAccount("Alice", "test");
+            var user = new UserAccount("Max", "test", null!, null!, null!);
             var movie = new Movie(
+                user.UserId,
                 "Cars",
                 "It's about cars.",
                 2006,
@@ -84,9 +84,10 @@ namespace Media_Ratings_Platform.Test
         [Fact]
         public void AddLikeSuccessTest()
         {
-            var user = new UserAccount("Max", "test");
-            var otherUserId = Guid.NewGuid();
+            var user = new UserAccount("Max", "test", null!, null!, null!);
+            var otherUser = new UserAccount("Alice", "test", null!, null!, null!);
             var movie = new Movie(
+                user.UserId,
                 "Cars",
                 "It's about cars.",
                 2006,
@@ -94,17 +95,18 @@ namespace Media_Ratings_Platform.Test
                 6
             );
             var rating = new UserRating(movie, user, 5, "Nice");
-            rating.AddLike(otherUserId);
+            rating.AddLike(otherUser.UserId);
 
-            Assert.Contains(otherUserId, rating.LikedBy);
+            Assert.Contains(otherUser.UserId, rating.LikedBy);
         }
 
         [Fact]
         public void AddLikeTwiceFailTest()
         {
-            var user = new UserAccount("Max", "test");
-            var otherUserId = Guid.NewGuid();
+            var user = new UserAccount("Max", "test", null!, null!, null!);
+            var otherUser = new UserAccount("Alice", "test", null!, null!, null!);
             var movie = new Movie(
+                user.UserId,
                 "Cars",
                 "It's about cars.",
                 2006,
@@ -112,8 +114,8 @@ namespace Media_Ratings_Platform.Test
                 6
             );
             var rating = new UserRating(movie, user, 5, "Nice");
-            rating.AddLike(otherUserId);
-            rating.AddLike(otherUserId);
+            rating.AddLike(otherUser.UserId);
+            rating.AddLike(otherUser.UserId); // should not add twice
 
             Assert.Single(rating.LikedBy);
         }
@@ -121,9 +123,10 @@ namespace Media_Ratings_Platform.Test
         [Fact]
         public void RemoveLikeSuccessTest()
         {
-            var user = new UserAccount("Max", "test");
-            var otherUserId = Guid.NewGuid();
+            var user = new UserAccount("Max", "test", null!, null!, null!);
+            var otherUser = new UserAccount("Alice", "test", null!, null!, null!);
             var movie = new Movie(
+                user.UserId,
                 "Cars",
                 "It's about cars.",
                 2006,
@@ -131,10 +134,10 @@ namespace Media_Ratings_Platform.Test
                 6
             );
             var rating = new UserRating(movie, user, 5, "Nice");
-            rating.AddLike(otherUserId);
-            rating.RemoveLike(otherUserId);
+            rating.AddLike(otherUser.UserId);
+            rating.RemoveLike(otherUser.UserId);
 
-            Assert.DoesNotContain(otherUserId, rating.LikedBy);
+            Assert.DoesNotContain(otherUser.UserId, rating.LikedBy);
         }
     }
 }
