@@ -19,6 +19,7 @@ namespace MediaRatings.Domain
     {
         public UserRating(IMediaEntry mediaEntry, UserAccount user, int starValue, string? comment)
         {
+            RatingId = _nextRatingId++;
             MediaEntry = mediaEntry;
             User = user;
             StarValue = starValue;
@@ -26,7 +27,8 @@ namespace MediaRatings.Domain
             RatingTimestamp = DateTime.Now;
         }
 
-        public Guid RatingId { get; private set; } = Guid.NewGuid();
+        private static int _nextRatingId = 1;
+        public int RatingId { get; private set; }
         public IMediaEntry MediaEntry { get; private set; }
         public UserAccount User { get; private set; }
         public int StarValue { get; private set; }
@@ -36,7 +38,7 @@ namespace MediaRatings.Domain
         public bool IsDeleted { get; private set; }
 
         // likes from other users
-        public HashSet<Guid> LikedBy { get; private set; } = new HashSet<Guid>();
+        public HashSet<int> LikedBy { get; private set; } = new HashSet<int>();
 
         public void Confirm()
         {
@@ -74,7 +76,7 @@ namespace MediaRatings.Domain
             IsConfirmed = false;
         }
 
-        public bool AddLike(Guid userId)
+        public bool AddLike(int userId)
         {
             if (LikedBy.Contains(userId))
             {
@@ -85,7 +87,7 @@ namespace MediaRatings.Domain
             return true;
         }
 
-        public void RemoveLike(Guid userId)
+        public void RemoveLike(int userId)
         {
             LikedBy.Remove(userId); 
         }

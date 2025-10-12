@@ -9,8 +9,7 @@ namespace MediaRatings.Domain
 {
     public class Game : MediaEntry
     {
-        public override MediaType MediaType => MediaType.Game;
-        public Game(string title, string description, int releaseYear, List<Genres> genres, int ageRestriction)
-            : base(Guid.NewGuid(), title, description, releaseYear, genres, ageRestriction) { }
+        public Game(int createdBy, string title, string description, int releaseYear, List<Genres> genres, int ageRestriction)
+        : base(createdBy, title, description, releaseYear, genres, ageRestriction, MediaType.Game) { }
     }
 }

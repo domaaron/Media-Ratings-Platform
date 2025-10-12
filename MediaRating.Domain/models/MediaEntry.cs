@@ -4,24 +4,28 @@ namespace MediaRatings.Domain
 {
     public abstract class MediaEntry : IMediaEntry
     {
-        public Guid CreatedBy { get; private set; }
+        private static int _nextId = 1;
+        public int MediaId { get; private set; }
+        public int CreatedBy { get; private set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        public abstract MediaType MediaType { get; }
+        public MediaType MediaType { get; protected set; }
         public int ReleaseYear { get; set; }
         public List<Genres> Genres { get; set; } = new List<Genres>();
         public int AgeRestriction { get; set; }
         public List<UserRating> Ratings { get; private set; } = new List<UserRating>();
-        public HashSet<Guid> FavoritedBy { get; private set; } = new HashSet<Guid>();
+        public HashSet<int> FavoritedBy { get; private set; } = new HashSet<int>();
 
-        protected MediaEntry(Guid createdBy, string title, string description, int releaseYear, List<Genres> genres, int ageRestriction)
+        protected MediaEntry(int createdBy, string title, string description, int releaseYear, List<Genres> genres, int ageRestriction, MediaType mediaType)
         {
+            MediaId = _nextId++;
             CreatedBy = createdBy;
             Title = title;
             Description = description;
             ReleaseYear = releaseYear;
             Genres = genres;
             AgeRestriction = ageRestriction;
+            MediaType = mediaType;
         }
 
         public void AddRating(UserRating rating)
@@ -29,12 +33,12 @@ namespace MediaRatings.Domain
             Ratings.Add(rating);
         }
 
-        public void AddFavorite(Guid userId)
+        public void AddFavorite(int userId)
         {
             FavoritedBy.Add(userId);
         }
 
-        public void RemoveFavorite(Guid userId)
+        public void RemoveFavorite(int userId)
         {
             FavoritedBy.Remove(userId);
         }

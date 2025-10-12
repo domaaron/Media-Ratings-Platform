@@ -22,8 +22,10 @@ namespace MediaRatings.Domain
     */
     public class UserAccount
     {
+        private static int _nextId = 1;
         public UserAccount(string username, string password, IMediaManager mediaManager, IFavoritesManager favoritesManager, IRatingManager ratingManager)
         {
+            UserId = _nextId++;
             Username = username;
             Password = password;
             MediaManager = mediaManager;
@@ -31,7 +33,7 @@ namespace MediaRatings.Domain
             RatingManager = ratingManager;
         }
 
-        public Guid UserId { get; private set; } = Guid.NewGuid();
+        public int UserId { get; private set; }
         public string Username { get; set; }
         public string Password { get; set; }
 
