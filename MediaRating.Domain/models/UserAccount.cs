@@ -31,6 +31,13 @@ namespace MediaRatings.Domain
             RatingManager = ratingManager;
         }
 
+        // constructor for user in DB
+        public UserAccount(int userId, string username, string password, IMediaManager mediaManager, IFavoritesManager favoritesManager, IRatingManager ratingManager)
+            : this(username, password, mediaManager, favoritesManager, ratingManager)
+        {
+            UserId = userId;
+        }
+
         public int UserId { get; private set; }
         public string Username { get; set; }
         public string Password { get; set; }
