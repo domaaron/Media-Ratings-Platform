@@ -4,7 +4,6 @@ namespace MediaRatings.Domain
 {
     public abstract class MediaEntry : IMediaEntry
     {
-        private static int _nextId = 1;
         public int MediaId { get; private set; }
         public int CreatedBy { get; private set; }
         public string Title { get; set; }
@@ -18,7 +17,6 @@ namespace MediaRatings.Domain
 
         protected MediaEntry(int createdBy, string title, string description, int releaseYear, List<Genres> genres, int ageRestriction, MediaType mediaType)
         {
-            MediaId = _nextId++;
             CreatedBy = createdBy;
             Title = title;
             Description = description;

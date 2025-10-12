@@ -19,7 +19,6 @@ namespace MediaRatings.Domain
     {
         public UserRating(IMediaEntry mediaEntry, UserAccount user, int starValue, string? comment)
         {
-            RatingId = _nextRatingId++;
             MediaEntry = mediaEntry;
             User = user;
             StarValue = starValue;
@@ -27,7 +26,6 @@ namespace MediaRatings.Domain
             RatingTimestamp = DateTime.Now;
         }
 
-        private static int _nextRatingId = 1;
         public int RatingId { get; private set; }
         public IMediaEntry MediaEntry { get; private set; }
         public UserAccount User { get; private set; }

@@ -22,10 +22,8 @@ namespace MediaRatings.Domain
     */
     public class UserAccount
     {
-        private static int _nextId = 1;
         public UserAccount(string username, string password, IMediaManager mediaManager, IFavoritesManager favoritesManager, IRatingManager ratingManager)
         {
-            UserId = _nextId++;
             Username = username;
             Password = password;
             MediaManager = mediaManager;
