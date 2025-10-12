@@ -27,7 +27,8 @@ namespace MediaRatings.Domain
         Fantasy,
         Thriller,
         Documentary,
-        Romance
+        Romance,
+        Unknown
     }
        
     public enum MediaType
