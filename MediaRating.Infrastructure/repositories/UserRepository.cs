@@ -56,7 +56,7 @@ namespace MediaRatings.Infrastructure.repositories
             await connection.OpenAsync();
 
             var cmd = new NpgsqlCommand(
-                "INSERT INTO users (id, username, password_hash) VALUES (@id, @u, @p)",
+                "INSERT INTO users (username, password_hash) VALUES (@u, @p) RETURNING id",
                 connection
             );
 
