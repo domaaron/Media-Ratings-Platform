@@ -3,16 +3,12 @@ using MediaRatings.Domain.repositories;
 using MediaRatings.Infrastructure.security;
 using Npgsql;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace MediaRatings.Infrastructure.repositories
 {
     public class UserRepository : IUserRepository
     {
-        // connection string for PostgreSQL database
         private readonly string _connectionString;
 
         public UserRepository(string connectionString)
@@ -20,18 +16,15 @@ namespace MediaRatings.Infrastructure.repositories
             _connectionString = connectionString;
         }
 
-        public async Task<UserAccount> FindByUsernameAsync(string username)
+        public async Task<UserAccount?> FindByUsernameAsync(string username)
         {
             await using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync();
 
-
-            // SQL command to select the user
             var cmd = new NpgsqlCommand(
                 "SELECT id, username, password_hash FROM users WHERE username = @u",
                 connection
-                );
-            // bind parameter safely to prevent SQL injection
+            );
             cmd.Parameters.AddWithValue("u", username ?? throw new ArgumentNullException(nameof(username)));
 
             await using var reader = await cmd.ExecuteReaderAsync();
@@ -46,19 +39,18 @@ namespace MediaRatings.Infrastructure.repositories
                 null!, null!, null!
             );
 
-            // set the ID from the database using reflection (private setter)
+            // assign ID from database (int)
             typeof(UserAccount)
                 .GetProperty(nameof(UserAccount.UserId))!
-                .SetValue(user, reader.GetGuid(0));
+                .SetValue(user, reader.GetInt32(0));
 
             return user;
         }
 
         public async Task<UserAccount> CreateAsync(string username, string passwordPlain)
         {
-            // hash the password before storing it
+            // hash password
             var passwordHash = PasswordHasher.HashPassword(passwordPlain);
-            var userId = Guid.NewGuid();
 
             await using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync();
@@ -68,26 +60,20 @@ namespace MediaRatings.Infrastructure.repositories
                 connection
             );
 
-            // bind parameters safely
-            cmd.Parameters.AddWithValue("id", userId);
             cmd.Parameters.AddWithValue("u", username);
             cmd.Parameters.AddWithValue("p", passwordHash);
 
+            int userId;
             try
             {
-                await cmd.ExecuteNonQueryAsync();
+                userId = (int)await cmd.ExecuteScalarAsync();
             }
-            catch (PostgresException ex) when (ex.SqlState == "23505")  // unique violation (username already exists)
+            catch (PostgresException ex) when (ex.SqlState == "23505") // unique violation
             {
                 throw new InvalidOperationException("Username already exists.");
             }
 
-            var user = new UserAccount(username, passwordHash, null!, null!, null!);
-            typeof(UserAccount)
-                .GetProperty(nameof(UserAccount.UserId))!
-                .SetValue(user, userId);
-
-            return user;
+            return new UserAccount(userId, username, passwordHash, null!, null!, null!);
         }
 
         public async Task<bool> ValidateCredentialsAsync(string username, string passwordPlain)
