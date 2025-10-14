@@ -88,6 +88,26 @@ namespace Media_Ratings_Platform.Test
         }
 
         [Fact]
+        public void AddSameFavoriteTwiceFailTest()
+        {
+            var (user, _, favoritesManager, _) = CreateUserWithServices("Max");
+
+            var movie = new Movie(
+                user.UserId,
+                "Cars",
+                "It's about cars.",
+                2006,
+                new List<Genres> { Genres.Animation, Genres.Comedy },
+                6
+            );
+
+            user.FavoritesManager.AddFavorite(movie);
+            user.FavoritesManager.AddFavorite(movie);
+
+            Assert.Single(user.FavoritesManager.GetAllFavorites());
+        }
+
+        [Fact]
         public void RemoveFavoriteSuccessTest()
         {
             var (user, _, favoritesManager, _) = CreateUserWithServices("Max");
@@ -213,6 +233,37 @@ namespace Media_Ratings_Platform.Test
             user.RatingManager.LikeRating(rating, user);
 
             Assert.False(user.RatingManager.LikeRating(rating, user));
+        }
+
+        [Fact]
+        public void GetMediaByIdSuccessTest()
+        {
+            var (user, _, _, ratingManager) = CreateUserWithServices("Max");
+
+            var movie1 = new Movie(
+                user.UserId,
+                "Cars",
+                "It's about cars.",
+                2006,
+                new List<Genres> { Genres.Animation, Genres.Comedy },
+                6
+            );
+
+            var movie2 = new Movie(
+                user.UserId,
+                "Inception",
+                "Dreams",
+                2006,
+                new List<Genres> { Genres.SciFi, Genres.Action },
+                6
+            );
+
+            user.MediaManager.AddMediaEntry(movie1);
+            user.MediaManager.AddMediaEntry(movie2);
+
+            var foundMovie = user.MediaManager.GetMediaById(movie1.MediaId);
+            Assert.NotNull(foundMovie);
+            Assert.Equal(movie1, foundMovie);
         }
     }
 }
