@@ -13,9 +13,9 @@ namespace MediaRatings.Domain.services
         // media created by own user
         private readonly List<IMediaEntry> _mediaEntries = new();
 
-        public IMediaEntry? GetMediaById(int id)
+        public IMediaEntry? GetMediaById(int mediaEntryId)
         {
-            return _mediaEntries.OfType<MediaEntry>().FirstOrDefault(m => m.MediaId == id);
+            return _mediaEntries.OfType<MediaEntry>().FirstOrDefault(m => m.MediaId == mediaEntryId);
         }
 
         public void AddMediaEntry(IMediaEntry mediaEntry)
