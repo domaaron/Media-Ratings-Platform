@@ -82,6 +82,24 @@ namespace Media_Ratings_Platform.Test
         }
 
         [Fact]
+        public void DeleteRatingByOtherUserFailTest()
+        {
+            var user = new UserAccount("Max", "test", null!, null!, null!);
+            var otherUser = new UserAccount("Alice", "test", null!, null!, null!);
+            var movie = new Movie(
+                user.UserId,
+                "Cars",
+                "It's about cars.",
+                2006,
+                new List<Genres> { Genres.Animation, Genres.Comedy },
+                6
+            );
+            var rating = new UserRating(movie, user, 5, "Nice");
+
+            Assert.Throws<UnauthorizedAccessException>(() => rating.DeleteRating(otherUser));
+        }
+
+        [Fact]
         public void AddLikeSuccessTest()
         {
             var user = new UserAccount("Max", "test", null!, null!, null!);
