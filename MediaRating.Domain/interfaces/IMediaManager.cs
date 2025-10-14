@@ -9,6 +9,7 @@ namespace MediaRatings.Domain.interfaces
 {
     public interface IMediaManager
     {
+        IMediaEntry? GetMediaById(int mediaEntryId);
         void AddMediaEntry(IMediaEntry mediaEntry);
         bool RemoveMediaEntry(int mediaEntryId);
         bool UpdateMediaEntry(int oldMediaEntryId, UpdateMediaDto mediaDto);
