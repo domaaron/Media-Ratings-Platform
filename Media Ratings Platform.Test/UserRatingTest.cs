@@ -1,4 +1,5 @@
 ﻿using MediaRatings.Domain;
+using MediaRatings.Domain.services;
 using System;
 using System.Collections.Generic;
 using Xunit;
@@ -10,7 +11,7 @@ namespace Media_Ratings_Platform.Test
         [Fact]
         public void ConfirmRatingSuccessTest()
         {
-            var user = new UserAccount("Max", "test", null!, null!, null!);
+            var user = new UserAccount("Max", "test", new MediaManager(), new FavoritesManager(), new RatingManager());
             var movie = new Movie(
                 user.UserId,
                 "Cars",
@@ -28,7 +29,7 @@ namespace Media_Ratings_Platform.Test
         [Fact]
         public void EditRatingSuccessTest()
         {
-            var user = new UserAccount("Max", "test", null!, null!, null!);
+            var user = new UserAccount("Max", "test", new MediaManager(), new FavoritesManager(), new RatingManager());
             var movie = new Movie(
                 user.UserId,
                 "Cars",
@@ -47,8 +48,8 @@ namespace Media_Ratings_Platform.Test
         [Fact]
         public void EditRatingFailTest()
         {
-            var user = new UserAccount("Max", "test", null!, null!, null!);
-            var otherUser = new UserAccount("Alice", "test", null!, null!, null!);
+            var user = new UserAccount("Max", "test", new MediaManager(), new FavoritesManager(), new RatingManager());
+            var otherUser = new UserAccount("Alice", "test", new MediaManager(), new FavoritesManager(), new RatingManager());
             var movie = new Movie(
                 user.UserId,
                 "Cars",
@@ -65,7 +66,7 @@ namespace Media_Ratings_Platform.Test
         [Fact]
         public void DeleteRatingSuccessTest()
         {
-            var user = new UserAccount("Max", "test", null!, null!, null!);
+            var user = new UserAccount("Max", "test", new MediaManager(), new FavoritesManager(), new RatingManager());
             var movie = new Movie(
                 user.UserId,
                 "Cars",
@@ -84,8 +85,8 @@ namespace Media_Ratings_Platform.Test
         [Fact]
         public void DeleteRatingByOtherUserFailTest()
         {
-            var user = new UserAccount("Max", "test", null!, null!, null!);
-            var otherUser = new UserAccount("Alice", "test", null!, null!, null!);
+            var user = new UserAccount("Max", "test", new MediaManager(), new FavoritesManager(), new RatingManager());
+            var otherUser = new UserAccount("Alice", "test", new MediaManager(), new FavoritesManager(), new RatingManager());
             var movie = new Movie(
                 user.UserId,
                 "Cars",
@@ -102,8 +103,8 @@ namespace Media_Ratings_Platform.Test
         [Fact]
         public void AddLikeSuccessTest()
         {
-            var user = new UserAccount("Max", "test", null!, null!, null!);
-            var otherUser = new UserAccount("Alice", "test", null!, null!, null!);
+            var user = new UserAccount("Max", "test", new MediaManager(), new FavoritesManager(), new RatingManager());
+            var otherUser = new UserAccount("Alice", "test", new MediaManager(), new FavoritesManager(), new RatingManager());
             var movie = new Movie(
                 user.UserId,
                 "Cars",
@@ -121,8 +122,8 @@ namespace Media_Ratings_Platform.Test
         [Fact]
         public void AddLikeTwiceFailTest()
         {
-            var user = new UserAccount("Max", "test", null!, null!, null!);
-            var otherUser = new UserAccount("Alice", "test", null!, null!, null!);
+            var user = new UserAccount("Max", "test", new MediaManager(), new FavoritesManager(), new RatingManager());
+            var otherUser = new UserAccount("Alice", "test", new MediaManager(), new FavoritesManager(), new RatingManager());
             var movie = new Movie(
                 user.UserId,
                 "Cars",
@@ -141,8 +142,8 @@ namespace Media_Ratings_Platform.Test
         [Fact]
         public void RemoveLikeSuccessTest()
         {
-            var user = new UserAccount("Max", "test", null!, null!, null!);
-            var otherUser = new UserAccount("Alice", "test", null!, null!, null!);
+            var user = new UserAccount("Max", "test", new MediaManager(), new FavoritesManager(), new RatingManager());
+            var otherUser = new UserAccount("Max", "test", new MediaManager(), new FavoritesManager(), new RatingManager());
             var movie = new Movie(
                 user.UserId,
                 "Cars",

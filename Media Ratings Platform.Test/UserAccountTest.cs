@@ -5,31 +5,18 @@ namespace Media_Ratings_Platform.Test
 {
     public class UserAccountTest
     {
-        private (UserAccount user, MediaManager mediaManager, FavoritesManager favoritesManager, RatingManager ratingManager) CreateUserWithServices(string username)
-        {
-            var mediaManager = new MediaManager();
-            var favoritesManager = new FavoritesManager();
-            var ratingManager = new RatingManager(null!);
-            var user = new UserAccount(username, "test", mediaManager, favoritesManager, ratingManager);
-
-            // Owner für RatingManager setzen
-            typeof(RatingManager).GetField("_owner", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
-                .SetValue(ratingManager, user);
-
-            return (user, mediaManager, favoritesManager, ratingManager);
-        }
-
         [Fact]
         public void CreateUserSuccessTest()
         {
-            var (user, _, _, _) = CreateUserWithServices("Max");
+            var user = new UserAccount("Max", "test", new MediaManager(), new FavoritesManager(), new RatingManager());
+
             Assert.NotNull(user);
         }
 
         [Fact]
         public void AddMediaEntryTest()
         {
-            var (user, mediaManager, _, _) = CreateUserWithServices("Max");
+            var user = new UserAccount("Max", "test", new MediaManager(), new FavoritesManager(), new RatingManager());
 
             var movie = new Movie(
                 user.UserId,
@@ -49,7 +36,7 @@ namespace Media_Ratings_Platform.Test
         [Fact]
         public void RemoveMediaEntrySuccessTest()
         {
-            var (user, mediaManager, _, _) = CreateUserWithServices("Max");
+            var user = new UserAccount("Max", "test", new MediaManager(), new FavoritesManager(), new RatingManager());
 
             var movie = new Movie(
                 user.UserId,
@@ -70,7 +57,7 @@ namespace Media_Ratings_Platform.Test
         [Fact]
         public void AddFavoriteSuccessTest()
         {
-            var (user, _, favoritesManager, _) = CreateUserWithServices("Max");
+            var user = new UserAccount("Max", "test", new MediaManager(), new FavoritesManager(), new RatingManager());
 
             var movie = new Movie(
                 user.UserId,
@@ -90,7 +77,7 @@ namespace Media_Ratings_Platform.Test
         [Fact]
         public void AddSameFavoriteTwiceFailTest()
         {
-            var (user, _, favoritesManager, _) = CreateUserWithServices("Max");
+            var user = new UserAccount("Max", "test", new MediaManager(), new FavoritesManager(), new RatingManager());
 
             var movie = new Movie(
                 user.UserId,
@@ -110,7 +97,7 @@ namespace Media_Ratings_Platform.Test
         [Fact]
         public void RemoveFavoriteSuccessTest()
         {
-            var (user, _, favoritesManager, _) = CreateUserWithServices("Max");
+            var user = new UserAccount("Max", "test", new MediaManager(), new FavoritesManager(), new RatingManager());
 
             var movie = new Movie(
                 user.UserId,
@@ -131,7 +118,7 @@ namespace Media_Ratings_Platform.Test
         [Fact]
         public void AddRatingSuccessTest()
         {
-            var (user, _, _, ratingManager) = CreateUserWithServices("Max");
+            var user = new UserAccount("Max", "test", new MediaManager(), new FavoritesManager(), new RatingManager());
 
             var movie = new Movie(
                 user.UserId,
@@ -152,7 +139,7 @@ namespace Media_Ratings_Platform.Test
         [Fact]
         public void RemoveRatingSuccessTest()
         {
-            var (user, _, _, ratingManager) = CreateUserWithServices("Max");
+            var user = new UserAccount("Max", "test", new MediaManager(), new FavoritesManager(), new RatingManager());
 
             var movie = new Movie(
                 user.UserId,
@@ -174,8 +161,8 @@ namespace Media_Ratings_Platform.Test
         [Fact]
         public void LikeRatingSuccessTest()
         {
-            var (user, _, _, ratingManager) = CreateUserWithServices("Max");
-            var (otherUser, _, _, otherRatingManager) = CreateUserWithServices("Alice");
+            var user = new UserAccount("Max", "test", new MediaManager(), new FavoritesManager(), new RatingManager());
+            var otherUser = new UserAccount("Alice", "test", new MediaManager(), new FavoritesManager(), new RatingManager());
 
             var movie = new Movie(
                 otherUser.UserId,
@@ -195,7 +182,7 @@ namespace Media_Ratings_Platform.Test
         [Fact]
         public void LikeOwnRatingFailTest()
         {
-            var (user, _, _, ratingManager) = CreateUserWithServices("Max");
+            var user = new UserAccount("Max", "test", new MediaManager(), new FavoritesManager(), new RatingManager());
 
             var movie = new Movie(
                 user.UserId,
@@ -215,8 +202,8 @@ namespace Media_Ratings_Platform.Test
         [Fact]
         public void LikeSameRatingTwiceFailTest()
         {
-            var (user, _, _, ratingManager) = CreateUserWithServices("Max");
-            var (otherUser, _, _, otherRatingManager) = CreateUserWithServices("Alice");
+            var user = new UserAccount("Max", "test", new MediaManager(), new FavoritesManager(), new RatingManager());
+            var otherUser = new UserAccount("Alice", "test", new MediaManager(), new FavoritesManager(), new RatingManager());
 
             var movie = new Movie(
                 otherUser.UserId,
@@ -238,7 +225,7 @@ namespace Media_Ratings_Platform.Test
         [Fact]
         public void GetMediaByIdSuccessTest()
         {
-            var (user, _, _, ratingManager) = CreateUserWithServices("Max");
+            var user = new UserAccount("Max", "test", new MediaManager(), new FavoritesManager(), new RatingManager());
 
             var movie1 = new Movie(
                 user.UserId,

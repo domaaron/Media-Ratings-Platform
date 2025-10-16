@@ -151,8 +151,7 @@ while (true)
             }
         }
 
-        // needs a user as parameter
-        var ratingManager = new RatingManager(user);
+        var ratingManager = new RatingManager();
 
         // ------------------ User profile endpoints ------------------
         if (request.HttpMethod == "GET" && path.StartsWith("/api/users/") && path.EndsWith("/profile"))
