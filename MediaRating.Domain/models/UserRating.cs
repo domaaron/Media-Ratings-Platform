@@ -28,7 +28,7 @@ namespace MediaRatings.Domain
 
         public int RatingId { get; private set; }
         public IMediaEntry MediaEntry { get; private set; }
-        public UserAccount User { get; private set; }
+        public UserAccount User { get; set; }
         public int StarValue { get; private set; }
         public string? Comment { get; private set; }
         public DateTime RatingTimestamp { get; private set; }
