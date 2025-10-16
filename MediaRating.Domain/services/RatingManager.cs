@@ -11,15 +11,14 @@ namespace MediaRatings.Domain.services
     {
         // ratings created by own user
         private readonly List<UserRating> _ratings = new();
-        private readonly UserAccount _owner;
-
-        public RatingManager(UserAccount owner)
-        {
-            _owner = owner;
-        }
 
         public void AddRating(UserRating rating)
         {
+            if (rating.User == null)
+            {
+                throw new ArgumentException("User must be set for the rating.");
+            }
+
             if (rating.StarValue < 1 || rating.StarValue > 5)
             {
                 throw new ArgumentOutOfRangeException("Invalid rating: Stars must be between 1 and 5.");
