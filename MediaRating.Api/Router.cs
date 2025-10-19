@@ -43,12 +43,31 @@ namespace MediaRatings.Api
         {
             public bool IsMatch(string urlPath)
             {
-                if (Path.Contains("{"))
+                var routeSegments = Path.Trim('/').Split('/');
+                var urlSegments = urlPath.Trim('/').Split('/');
+
+                if (routeSegments.Length != urlSegments.Length)
                 {
-                    var pattern = "^" + Regex.Replace(Path, "{[^/]+}", "[^/]+") + "$";
-                    return Regex.IsMatch(urlPath, pattern);
+                    return false;
                 }
-                return urlPath.Equals(Path, StringComparison.OrdinalIgnoreCase);
+
+                for (int i = 0; i < routeSegments.Length; i++)
+                {
+                    var routeSegment = routeSegments[i];
+                    var urlSegment = urlSegments[i];
+
+                    if (routeSegment.StartsWith("{") && routeSegment.EndsWith("}"))
+                    {
+                        continue;
+                    }
+
+                    if (!routeSegment.Equals(urlSegment, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
             }
         }
     }
