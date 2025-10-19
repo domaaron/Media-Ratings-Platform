@@ -91,3 +91,21 @@ var options = new JsonSerializerOptions
 {
     PropertyNameCaseInsensitive = true
 };
+```
+
+Ein weiteres Problem während der Umsetzung war die Aufteilung der Program.cs in mehrere spezialisierte Komponenten. Dieser Schritt hat deutlich mehr Zeit in Anspruch genommen als zunächst geplant und es funktionierte nach der Aufteilung nicht sofort alles wie erwartet. Somit war mehrfaches Testen und Anpassen notwendig, um die vollständige Funktionalität wiederherzustellen.
+
+**Lösung:**
+Durch die Aufteilung in mehrere kleinere Klassen ist die Anzahl der Zeilen in der Program.cs von 384 Zeilen zu nur 60 Zeilen gesunken. Zudem hat sich die Ordnerstruktur wie folgt verändert:
+```bash
+/MediaRatings.Api
+  /controllers
+    AuthController.cs
+    MediaController.cs
+    UserController.cs
+  /Utils
+    HttpHelper.cs
+    JsonHelper.cs
+  Program.cs
+  Router.cs
+```
