@@ -17,24 +17,27 @@ namespace Media_Ratings_Platform.services
         {
             _secret = secret;
         }
-        public string GenerateToken(string username)
+        public string GenerateToken(int userId, string username)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
+            var claims = new[]
+            {
+                new Claim("userId", userId.ToString()),
+                new Claim("username", username)
+            };
+
             var token = new JwtSecurityToken(
-                claims: new[]
-                {
-                    new Claim(ClaimTypes.Name, username)
-                },
+                claims: claims,
                 expires: DateTime.UtcNow.AddHours(2),
                 signingCredentials: credentials
-                );
+            );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public string? ValidateToken(string token)
+        public (int UserId, string Username)? ValidateToken(string token)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(_secret);
@@ -51,15 +54,10 @@ namespace Media_Ratings_Platform.services
                 }, out SecurityToken validatedToken);
 
                 var jwtToken = (JwtSecurityToken)validatedToken;
+                var userId = int.Parse(jwtToken.Claims.First(c => c.Type == "id").Value);
+                var username = jwtToken.Claims.First(c => c.Type == "username").Value;
 
-                Console.WriteLine("Token claims: ");
-                foreach (var c in jwtToken.Claims)
-                {
-                    Console.WriteLine($"{c.Type} => {c.Value}");
-                }
-
-                var username = jwtToken.Claims.First(x => x.Type == "username").Value;
-                return username;
+                return (userId, username);
             }
             catch (Exception ex)
             {
