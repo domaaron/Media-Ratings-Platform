@@ -19,8 +19,7 @@ using System.Text.Json;
 var connectionString = "Host=localhost;Database=mrp;Username=postgres;Password=1234";
 
 // generate a secure random JWT secret (32 bytes = 256 bits)
-//var jwtSecret = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
-var jwtSecret = "super-geheimes-statisches-secret-1234567890";
+var jwtSecret = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
 
 // initialize dependencies
 var userRepository = new UserRepository(connectionString);
