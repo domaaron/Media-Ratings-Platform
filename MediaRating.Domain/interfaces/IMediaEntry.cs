@@ -40,6 +40,8 @@ namespace MediaRatings.Domain
 
     public interface IMediaEntry
     {
+        int MediaId { get; }
+        int CreatedBy { get; }
         string Title { get; set; }
         string Description { get; set; }
         MediaType MediaType { get; }
