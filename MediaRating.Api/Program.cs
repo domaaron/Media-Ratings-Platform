@@ -23,6 +23,7 @@ var jwtService = new JwtService(jwtSecret);
 // initialize managers (CRUD, Ratings, Favorites)
 var mediaManager = new MediaManager();
 var favoritesManager = new FavoritesManager();
+var ratingManager = new RatingManager();
 
 // create an HTTP listener on localhost
 var listener = new HttpListener();
@@ -150,8 +151,6 @@ while (true)
                 continue;
             }
         }
-
-        var ratingManager = new RatingManager();
 
         // ------------------ User profile endpoints ------------------
         if (request.HttpMethod == "GET" && path.StartsWith("/api/users/") && path.EndsWith("/profile"))
