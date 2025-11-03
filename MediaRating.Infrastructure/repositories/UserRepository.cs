@@ -59,7 +59,6 @@ namespace MediaRatings.Infrastructure.repositories
                 "INSERT INTO users (username, password_hash) VALUES (@u, @p) RETURNING id",
                 connection
             );
-
             cmd.Parameters.AddWithValue("u", username);
             cmd.Parameters.AddWithValue("p", passwordHash);
 
@@ -85,6 +84,38 @@ namespace MediaRatings.Infrastructure.repositories
             }
 
             return PasswordHasher.Verify(passwordPlain, user.Password);
+        }
+
+        // not necessary for this project, only implemented for the database exercises
+        public async Task UpdatePasswordAsync(string username, string newPassword)
+        {
+            var newHash = PasswordHasher.HashPassword(newPassword);
+            await using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            var cmd = new NpgsqlCommand(
+                "UPDATE users SET password_hash = @p WHERE username = @u",
+                connection
+            );
+            cmd.Parameters.AddWithValue("u", username);
+            cmd.Parameters.AddWithValue("p", newHash);
+
+            await cmd.ExecuteNonQueryAsync();
+        }
+
+        // not necessary for this project, only implemented for the database exercises
+        public async Task DeleteAsync(string username)
+        {
+            await using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            var cmd = new NpgsqlCommand(
+                "DELETE FROM users WHERE username = @u",
+                connection
+            );
+            cmd.Parameters.AddWithValue("u", username);
+
+            await cmd.ExecuteNonQueryAsync();
         }
     }
 }
