@@ -53,8 +53,6 @@ namespace MediaRatings.Api.controllers
 
             var result = new
             {
-                entry.MediaId,
-                entry.CreatedBy,
                 entry.Title,
                 entry.Description,
                 MediaType = entry.MediaType.ToString().ToLower(),
