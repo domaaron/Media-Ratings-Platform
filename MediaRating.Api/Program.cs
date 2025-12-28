@@ -4,6 +4,7 @@ using MediaRatings.Api;
 using MediaRatings.Api.controllers;
 using MediaRatings.Domain;
 using MediaRatings.Domain.services;
+using MediaRatings.Infrastructure;
 using MediaRatings.Infrastructure.repositories;
 using System;
 using System.Net;
@@ -18,6 +19,10 @@ using System.Text.Json;
 // connection string for PostgreSQL database
 var connectionString = "Host=localhost;Database=mrp;Username=postgres;Password=1234";
 
+// DB init
+var dbInitializer = new DatabaseInitializer(connectionString);
+dbInitializer.Initialize();
+
 // generate a secure random JWT secret (32 bytes = 256 bits)
 var jwtSecret = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
 
@@ -25,7 +30,8 @@ var jwtSecret = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
 var userRepository = new UserRepository(connectionString);
 var authService = new AuthService(userRepository, jwtSecret);
 var jwtService = new JwtService(jwtSecret);
-var mediaManager = new MediaManager();
+var mediaRepository = new MediaRepository(connectionString);
+var mediaManager = new MediaManager(mediaRepository);
 var favoritesManager = new FavoritesManager();
 var ratingManager = new RatingManager();
 
