@@ -8,7 +8,7 @@ namespace MediaRatings.Domain
 {
     public class Movie : MediaEntry
     {
-        public Movie(int createdBy, string title, string description, int releaseYear, List<Genres> genres, int ageRestriction)
-        : base(createdBy, title, description, releaseYear, genres, ageRestriction, MediaType.Movie) { }
+        public Movie(int createdBy, string title, string description, int releaseYear, List<Genres> genres, int ageRestriction, int mediaId = 0)
+        : base(createdBy, title, description, releaseYear, genres, ageRestriction, MediaType.Movie, mediaId) { }
     }
 }

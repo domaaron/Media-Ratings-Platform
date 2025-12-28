@@ -15,7 +15,7 @@ namespace MediaRatings.Domain
         public List<UserRating> Ratings { get; private set; } = new List<UserRating>();
         public HashSet<int> FavoritedBy { get; private set; } = new HashSet<int>();
 
-        protected MediaEntry(int createdBy, string title, string description, int releaseYear, List<Genres> genres, int ageRestriction, MediaType mediaType)
+        protected MediaEntry(int createdBy, string title, string description, int releaseYear, List<Genres> genres, int ageRestriction, MediaType mediaType, int mediaId = 0)
         {
             CreatedBy = createdBy;
             Title = title;
@@ -24,6 +24,7 @@ namespace MediaRatings.Domain
             Genres = genres;
             AgeRestriction = ageRestriction;
             MediaType = mediaType;
+            MediaId = mediaId;
         }
 
         public void AddRating(UserRating rating)
