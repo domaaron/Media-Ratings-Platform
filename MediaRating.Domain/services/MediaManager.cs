@@ -10,40 +10,45 @@ namespace MediaRatings.Domain.services
 {
     public class MediaManager : IMediaManager
     {
-        // media created by own user
-        private readonly List<IMediaEntry> _mediaEntries = new();
+        private readonly IMediaRepository _repository;
+
+        public MediaManager(IMediaRepository repository)
+        {
+            _repository = repository;
+        }
 
         public IMediaEntry? GetMediaById(int mediaEntryId)
         {
-            return _mediaEntries.OfType<MediaEntry>().FirstOrDefault(m => m.MediaId == mediaEntryId);
+            return _repository.GetMediaById(mediaEntryId);
+        }
+
+        public IReadOnlyCollection<IMediaEntry> GetAllMediaEntries()
+        {
+            return _repository.GetAllMedia();
         }
 
         public void AddMediaEntry(IMediaEntry mediaEntry)
         {
-            if (!_mediaEntries.Contains(mediaEntry))
-            {
-                _mediaEntries.Add(mediaEntry);
-            }
+            _repository.CreateMediaEntry(mediaEntry);
         }
 
         public bool RemoveMediaEntry(int mediaEntryId)
         {
-            var entry = GetMediaById(mediaEntryId);
-            if (entry == null) return false;
-
-            _mediaEntries.Remove(entry);
-            return true;
+            return _repository.DeleteMediaEntry(mediaEntryId);
         }
 
-        public bool UpdateMediaEntry(int oldMediaEntry, UpdateMediaDto mediaDto)
+        public bool UpdateMediaEntry(int mediaEntryId, UpdateMediaDto mediaDto)
         {
-            var entry = _mediaEntries.OfType<MediaEntry>().FirstOrDefault(m => m.MediaId == oldMediaEntry);
-            if (entry == null)
-            {
+            var existing = _repository.GetMediaById(mediaEntryId) as MediaEntry;
+            if (existing == null)
                 return false;
-            }
 
-            Genres ParseGenre(string g) => g.ToLower() switch
+            existing.Title = mediaDto.Title;
+            existing.Description = mediaDto.Description;
+            existing.ReleaseYear = mediaDto.ReleaseYear;
+            existing.AgeRestriction = mediaDto.AgeRestriction;
+
+            existing.Genres = mediaDto.Genres.Select(g => g.ToLower() switch
             {
                 "action" => Genres.Action,
                 "thriller" => Genres.Thriller,
@@ -54,25 +59,14 @@ namespace MediaRatings.Domain.services
                 "fantasy" => Genres.Fantasy,
                 "adventure" => Genres.Adventure,
                 _ => Genres.Unknown
-            };
+            }).ToList();
 
-            entry.Title = mediaDto.Title;
-            entry.Description = mediaDto.Description;
-            entry.ReleaseYear = mediaDto.ReleaseYear;
-            entry.AgeRestriction = mediaDto.AgeRestriction;
-            entry.Genres = mediaDto.Genres.Select(ParseGenre).ToList();
-
-            return true;
+            return _repository.UpdateMediaEntry(existing);
         }
 
         public int CountMediaEntries()
         {
-            return _mediaEntries.Count;
-        }
-
-        public IReadOnlyCollection<IMediaEntry> GetAllMediaEntries()
-        {
-            return _mediaEntries.AsReadOnly();
+            return _repository.GetAllMedia().Count;
         }
     }
 }
