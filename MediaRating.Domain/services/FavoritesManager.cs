@@ -1,4 +1,5 @@
 ﻿using MediaRatings.Domain.interfaces;
+using MediaRatings.Domain.repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,26 +10,32 @@ namespace MediaRatings.Domain.services
 {
     public class FavoritesManager : IFavoritesManager
     {
-        // favorites, no duplicate values
-        private readonly HashSet<IMediaEntry> _favorites = new();
-        public void AddFavorite(IMediaEntry mediaEntry)
+        private readonly IFavoritesRepository _repository;
+
+        public FavoritesManager(IFavoritesRepository repository)
         {
-            _favorites.Add(mediaEntry);
+            _repository = repository;
         }
 
-        public void RemoveFavorite(IMediaEntry mediaEntry)
+        public async Task AddFavoriteAsync(int userId, int mediaId)
         {
-            _favorites.Remove(mediaEntry);
+            await _repository.AddFavoriteAsync(userId, mediaId);
         }
 
-        public int CountFavorites()
+        public async Task RemoveFavoriteAsync(int userId, int mediaId)
         {
-            return _favorites.Count;
+            await _repository.RemoveFavoriteAsync(userId, mediaId);
         }
 
-        public IReadOnlyCollection<IMediaEntry> GetAllFavorites()
+        public async Task<int> CountFavoritesAsync(int userId)
         {
-            return _favorites;
+            var favorites = await _repository.GetFavoritesByUserAsync(userId);
+            return favorites.Count;
+        }
+
+        public async Task<IReadOnlyCollection<IMediaEntry>> GetAllFavoritesAsync(int userId)
+        {
+            return await _repository.GetFavoritesByUserAsync(userId);
         }
     }
 }
