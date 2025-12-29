@@ -86,6 +86,37 @@ namespace MediaRatings.Infrastructure.repositories
             return PasswordHasher.Verify(passwordPlain, user.Password);
         }
 
+        public async Task<UserAccount?> GetByIdAsync(int userId)
+        {
+            await using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            var cmd = new NpgsqlCommand(
+                "SELECT id, username, password_hash FROM users WHERE id = @id",
+                connection
+            );
+            cmd.Parameters.AddWithValue("id", userId);
+
+            await using var reader = await cmd.ExecuteReaderAsync();
+            if (!await reader.ReadAsync())
+            {
+                return null;
+            }
+
+            var user = new UserAccount(
+                reader.GetString(1),
+                reader.GetString(2),
+                null!, null!, null!
+            );
+
+            // assign ID from database (int)
+            typeof(UserAccount)
+                .GetProperty(nameof(UserAccount.UserId))!
+                .SetValue(user, reader.GetInt32(0));
+
+            return user;
+        }
+
         // not necessary for this project, only implemented for the database exercises
         public async Task UpdatePasswordAsync(string username, string newPassword)
         {
