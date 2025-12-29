@@ -17,13 +17,15 @@ namespace MediaRatings.Domain
     */
     public class UserRating
     {
-        public UserRating(IMediaEntry mediaEntry, UserAccount user, int starValue, string? comment)
+        public UserRating(int ratingId, IMediaEntry mediaEntry, UserAccount user, int starValue, string? comment, DateTime createdAt, bool isConfirmed)
         {
+            RatingId = ratingId;
             MediaEntry = mediaEntry;
             User = user;
             StarValue = starValue;
             Comment = comment;
-            RatingTimestamp = DateTime.Now;
+            RatingTimestamp = createdAt;
+            IsConfirmed = isConfirmed;
         }
 
         public int RatingId { get; private set; }
@@ -45,7 +47,7 @@ namespace MediaRatings.Domain
 
         public void EditRating(UserAccount user, int newStars, string? newComment)
         {
-            if (user != User)
+            if (user.UserId != User.UserId)
             {
                 throw new UnauthorizedAccessException("You can only edit your own ratings.");
             }
@@ -63,7 +65,7 @@ namespace MediaRatings.Domain
 
         public void DeleteRating(UserAccount user)
         {
-            if (user != User)
+            if (user.UserId != User.UserId)
             {
                 throw new UnauthorizedAccessException("You can only delete your own ratings.");
             }
