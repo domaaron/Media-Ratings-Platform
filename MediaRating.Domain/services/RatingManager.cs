@@ -1,4 +1,5 @@
 ﻿using MediaRatings.Domain.interfaces;
+using MediaRatings.Domain.repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +10,14 @@ namespace MediaRatings.Domain.services
 {
     public class RatingManager : IRatingManager
     {
-        // ratings created by own user
-        private readonly List<UserRating> _ratings = new();
+        private readonly IRatingRepository _repository;
 
-        public void AddRating(UserRating rating)
+        public RatingManager(IRatingRepository repository)
+        {
+            _repository = repository;
+        }
+
+        public async Task AddRatingAsync(UserRating rating)
         {
             if (rating.User == null)
             {
@@ -24,55 +29,68 @@ namespace MediaRatings.Domain.services
                 throw new ArgumentOutOfRangeException("Invalid rating: Stars must be between 1 and 5.");
             }
 
-            _ratings.Add(rating);
+            await _repository.AddRatingAsync(rating);
         }
 
-        public void RemoveRating(UserRating rating)
+        public async Task RemoveRatingAsync(UserRating rating)
         {
-            _ratings.Remove(rating);
+            await _repository.DeleteRatingAsync(rating.RatingId);
         }
 
-        public bool LikeRating(UserRating ratingToLike, UserAccount likingUser)
+        public async Task<bool> LikeRatingAsync(UserRating ratingToLike, UserAccount likingUser)
         {
             // cannot like own rating
-            if (ratingToLike.User == likingUser)
+            if (ratingToLike.User.UserId == likingUser.UserId)
             {
                 return false;
             }
 
             // cannot like twice the same rating
-            if (ratingToLike.LikedBy.Contains(likingUser.UserId))
+            if (!ratingToLike.AddLike(likingUser.UserId))
             {
                 return false;
             }
 
-            ratingToLike.LikedBy.Add(likingUser.UserId);
+            await _repository.UpdateRatingAsync(ratingToLike);
             return true;
         }
 
-        public IEnumerable<UserRating> GetRatingHistory()
+        public async Task<IEnumerable<UserRating>> GetRatingHistoryAsync(int userId)
         {
-            return _ratings.OrderByDescending(rating => rating.StarValue);
+            var ratings = await _repository.GetRatingByUserAsync(userId);
+            return ratings.OrderByDescending(rating => rating.RatingTimestamp);
         }
 
-        public double AverageRatingGiven()
+        public async Task<double> AverageRatingGivenAsync(int userId)
         {
-            if (!_ratings.Any())
+            var ratings = await _repository.GetRatingByUserAsync(userId);
+            if (!ratings.Any())
             {
                 return 0;
             }
 
-            return _ratings.Average(r => r.StarValue);
+            return ratings.Average(r => r.StarValue);
         }
 
-        public int CountRatings()
+        public async Task<int> CountRatingsAsync(int userId)
         {
-            return _ratings.Count();
+            var ratings = await _repository.GetRatingByUserAsync(userId);
+            return ratings.Count;
         }
 
-        public IReadOnlyCollection<UserRating> GetAllRatings()
+        public async Task<IReadOnlyCollection<UserRating>> GetAllRatingsAsync(int userId)
         {
-            return _ratings.AsReadOnly();
+            return await _repository.GetRatingByUserAsync(userId);
+        }
+
+        public async Task UpdateRatingAsync(UserRating rating)
+        {
+            await _repository.UpdateRatingAsync(rating);
+        }
+
+        public async Task<UserRating?> GetRatingByIdAsync(int ratingId)
+        {
+            return await _repository.GetRatingByIdAsync(ratingId);
         }
 
     }
