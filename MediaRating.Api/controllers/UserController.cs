@@ -48,9 +48,9 @@ namespace MediaRatings.Api.controllers
             {
                 user.UserId,
                 user.Username,
-                TotalRatings = _ratingManager.CountRatings(),
-                AverageScore = _ratingManager.AverageRatingGiven(),
-                Favorites = _favoritesManager.CountFavorites()
+                TotalRatings = _ratingManager.CountRatingsAsync(user.UserId),
+                AverageScore = _ratingManager.AverageRatingGivenAsync(user.UserId),
+                Favorites = _favoritesManager.CountFavoritesAsync(user.UserId)
             };
 
             await HttpHelper.WriteJsonAsync(context.Response, 200, profile);

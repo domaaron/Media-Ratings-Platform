@@ -8,9 +8,9 @@ namespace MediaRatings.Domain.interfaces
 {
     public interface IFavoritesManager
     {
-        void AddFavorite(IMediaEntry mediaEntry);
-        void RemoveFavorite(IMediaEntry mediaEntry);
-        int CountFavorites();
-        IReadOnlyCollection<IMediaEntry> GetAllFavorites();
+        Task AddFavoriteAsync(int userId, int mediaId);
+        Task RemoveFavoriteAsync(int userId, int mediaId);
+        Task<int> CountFavoritesAsync(int userId);
+        Task<IReadOnlyCollection<IMediaEntry>> GetAllFavoritesAsync(int userId);
     }
 }
