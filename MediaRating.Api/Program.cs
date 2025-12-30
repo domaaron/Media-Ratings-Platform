@@ -42,24 +42,30 @@ var ratingManager = new RatingManager(ratingRepository);
 var authController = new AuthController(authService);
 var userController = new UserController(jwtService, userRepository, ratingManager, favoritesManager);
 var mediaController = new MediaController(mediaManager, jwtService, userRepository, ratingManager);
+var ratingController = new RatingController(ratingManager, mediaManager, userRepository, jwtService);
 
 // router
 var router = new Router();
+
+// authentication
 router.Register("POST", "/api/users/register", authController.RegisterAsync);
 router.Register("POST", "/api/users/login", authController.LoginAsync);
 
+// profile
 router.Register("GET", "/api/users/{id}/profile", userController.GetProfileAsync);
 
+// media management
 router.Register("POST", "/api/media", mediaController.CreateMediaAsync);
 router.Register("GET", "/api/media", mediaController.GetAllMediaAsync);
 router.Register("GET", "/api/media/{id}", mediaController.GetMediaByIdAsync);
 router.Register("PUT", "/api/media/{id}", mediaController.UpdateMediaAsync);
 router.Register("DELETE", "/api/media/{id}", mediaController.DeleteMediaAsync);
 
-router.Register("POST", "/api/media/{id}/rate", mediaController.RateMediaAsync);
-router.Register("PUT", "/api/ratings/{ratingId}", mediaController.EditRatingAsync);
-router.Register("POST", "/api/ratings/{ratingId}/like", mediaController.LikeRatingAsync);
-router.Register("POST", "/api/ratings/{ratingId}/confirm", mediaController.ConfirmRatingAsync);
+// rating management
+router.Register("POST", "/api/media/{id}/rate", ratingController.RateMediaAsync);
+router.Register("PUT", "/api/ratings/{ratingId}", ratingController.EditRatingAsync);
+router.Register("POST", "/api/ratings/{ratingId}/like", ratingController.LikeRatingAsync);
+router.Register("POST", "/api/ratings/{ratingId}/confirm", ratingController.ConfirmRatingAsync);
 
 // start http server
 var listener = new HttpListener();
