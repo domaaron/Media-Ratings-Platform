@@ -28,6 +28,19 @@ namespace MediaRatings.Domain
             IsConfirmed = isConfirmed;
         }
 
+        public static UserRating Create(IMediaEntry media, UserAccount user, int stars, string? comment)
+        {
+            return new UserRating(
+                0,
+                media,
+                user,
+                stars,
+                comment,
+                DateTime.UtcNow,
+                false
+            );
+        }
+
         public int RatingId { get; private set; }
         public IMediaEntry MediaEntry { get; private set; }
         public UserAccount User { get; set; }
