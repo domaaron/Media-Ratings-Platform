@@ -37,7 +37,7 @@ namespace MediaRatings.Infrastructure.repositories
             await cmd.ExecuteNonQueryAsync();
         }
 
-        public async Task RemoveFavoriteAsync(int userId, int mediaId)
+        public async Task<bool> RemoveFavoriteAsync(int userId, int mediaId)
         {
             await using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync();
@@ -47,7 +47,8 @@ namespace MediaRatings.Infrastructure.repositories
             cmd.Parameters.AddWithValue("user", userId);
             cmd.Parameters.AddWithValue("media", mediaId);
 
-            await cmd.ExecuteNonQueryAsync();
+            var rowsAffected = await cmd.ExecuteNonQueryAsync();
+            return rowsAffected > 0;
         }
 
         public async Task<IReadOnlyCollection<IMediaEntry>> GetFavoritesByUserAsync(int userId)
