@@ -22,9 +22,9 @@ namespace MediaRatings.Domain.services
             await _repository.AddFavoriteAsync(userId, mediaId);
         }
 
-        public async Task RemoveFavoriteAsync(int userId, int mediaId)
+        public async Task<bool> RemoveFavoriteAsync(int userId, int mediaId)
         {
-            await _repository.RemoveFavoriteAsync(userId, mediaId);
+            return await _repository.RemoveFavoriteAsync(userId, mediaId);
         }
 
         public async Task<int> CountFavoritesAsync(int userId)
