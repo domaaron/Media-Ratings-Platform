@@ -14,17 +14,15 @@ using System.Threading.Tasks;
 
 namespace MediaRatings.Api.controllers
 {
-    public class MediaController
+    public class MediaController : BaseController
     {
         private readonly MediaManager _mediaManager;
-        private readonly JwtService _jwtService;
         private readonly IUserRepository _userRepository;
         private readonly IRatingManager _ratingManager;
 
-        public MediaController(MediaManager mediaManager, JwtService jwtService, IUserRepository userRepository, IRatingManager ratingManager)
+        public MediaController(MediaManager mediaManager, JwtService jwtService, IUserRepository userRepository, IRatingManager ratingManager) : base(jwtService)
         {
             _mediaManager = mediaManager;
-            _jwtService = jwtService;
             _userRepository = userRepository;
             _ratingManager = ratingManager;
         }
@@ -186,194 +184,6 @@ namespace MediaRatings.Api.controllers
 
             var deleted = _mediaManager.RemoveMediaEntry(id.Value);
             await HttpHelper.WriteTextAsync(context.Response, deleted ? 204 : 404, deleted ? "" : "Not found");
-        }
-
-        // ----------------------------------- rating section -----------------------------------
-        public async Task RateMediaAsync(HttpListenerContext context)
-        {
-            var userId = await AuthenticateAsync(context.Request, context.Response);
-            if (userId == null)
-            {
-                return;
-            }
-
-            var mediaId = ExtractId(context.Request.Url.AbsolutePath);
-            if (mediaId == null)
-            {
-                await HttpHelper.WriteTextAsync(context.Response, 400, "Invalid media ID");
-                return;
-            }
-
-            var dto = await JsonHelper.ReadBodyAsync<RateMediaDto>(context.Request);
-            if (dto == null || dto.Stars < 1 || dto.Stars > 5)
-            {
-                await HttpHelper.WriteTextAsync(context.Response, 400, "Invalid rating data");
-                return;
-            }
-
-            var mediaEntry = _mediaManager.GetMediaById(mediaId.Value);
-            if (mediaEntry == null)
-            {
-                await HttpHelper.WriteTextAsync(context.Response, 404, "Media not found");
-                return;
-            }
-
-            var rating = new UserRating(
-                ratingId: 0, // set by DB
-                mediaEntry: mediaEntry,
-                user: await _userRepository.GetByIdAsync(userId.Value), // user from DB
-                starValue: dto.Stars,
-                comment: dto.Comment,
-                createdAt: DateTime.UtcNow,
-                isConfirmed: false
-            );
-
-            await _ratingManager.AddRatingAsync(rating);
-            await HttpHelper.WriteJsonAsync(context.Response, 201, new
-            {
-                mediaId = mediaEntry.MediaId,
-                stars = dto.Stars,
-                comment = dto.Comment
-            });
-        }
-
-        public async Task EditRatingAsync(HttpListenerContext context)
-        {
-            var userId = await AuthenticateAsync(context.Request, context.Response);
-            if (userId == null)
-            {
-                return;
-            }
-
-            var segments = context.Request.Url.AbsolutePath.Trim('/').Split('/');
-            if (segments.Length < 3 || !int.TryParse(segments[2], out var ratingId))
-            {
-                await HttpHelper.WriteTextAsync(context.Response, 400, "Invalid rating ID");
-                return;
-            }
-
-            var dto = await JsonHelper.ReadBodyAsync<EditRatingDto>(context.Request);
-            if (dto == null || dto.Stars < 1 || dto.Stars > 5)
-            {
-                await HttpHelper.WriteTextAsync(context.Response, 400, "Invalid rating data");
-                return;
-            }
-
-            var rating = await _ratingManager.GetRatingByIdAsync(ratingId);
-            if (rating == null)
-            {
-                await HttpHelper.WriteTextAsync(context.Response, 404, "Rating not found");
-                return;
-            }
-
-            if (rating.User == null || rating.User.UserId != userId.Value)
-            {
-                await HttpHelper.WriteTextAsync(context.Response, 403, "You can only edit your own ratings.");
-                return;
-            }
-
-            var user = await _userRepository.GetByIdAsync(userId.Value);
-            rating.EditRating(user, dto.Stars, dto.Comment);
-            await _ratingManager.UpdateRatingAsync(rating);
-
-            await HttpHelper.WriteJsonAsync(context.Response, 200, new { rating.RatingId, rating.StarValue, rating.Comment });
-        }
-
-        public async Task LikeRatingAsync(HttpListenerContext context)
-        {
-            var userId = await AuthenticateAsync(context.Request, context.Response);
-            if (userId == null) return;
-
-            var segments = context.Request.Url.AbsolutePath.Trim('/').Split('/');
-            if (segments.Length < 3 || !int.TryParse(segments[2], out var ratingId))
-            {
-                await HttpHelper.WriteTextAsync(context.Response, 400, "Invalid rating ID");
-                return;
-            }
-
-            var rating = await _ratingManager.GetRatingByIdAsync(ratingId);
-            if (rating == null)
-            {
-                await HttpHelper.WriteTextAsync(context.Response, 404, "Rating not found");
-                return;
-            }
-
-            var likingUser = await _userRepository.GetByIdAsync(userId.Value);
-            var success = await _ratingManager.LikeRatingAsync(rating, likingUser);
-            if (!success)
-            {
-                await HttpHelper.WriteTextAsync(context.Response, 400, "Cannot like rating (maybe your own or already liked)");
-                return;
-            }
-
-            await HttpHelper.WriteTextAsync(context.Response, 200, "Rating liked");
-        }
-
-        public async Task ConfirmRatingAsync(HttpListenerContext context)
-        {
-            var userId = await AuthenticateAsync(context.Request, context.Response);
-            if (userId == null)
-            {
-                return;
-            }
-
-            var segments = context.Request.Url.AbsolutePath.Trim('/').Split('/');
-            if (segments.Length < 3 || !int.TryParse(segments[2], out var ratingId))
-            {
-                await HttpHelper.WriteTextAsync(context.Response, 400, "Invalid rating ID");
-                return;
-            }
-
-            var rating = await _ratingManager.GetRatingByIdAsync(ratingId);
-            if (rating == null)
-            {
-                await HttpHelper.WriteTextAsync(context.Response, 404, "Rating not found");
-                return;
-            }
-
-            // only creator of rating can confirm
-            if (rating.User.UserId != userId.Value)
-            {
-                await HttpHelper.WriteTextAsync(context.Response, 403, "Cannot confirm another user's rating");
-                return;
-            }
-
-            rating.Confirm();
-            await _ratingManager.UpdateRatingAsync(rating);
-
-            await HttpHelper.WriteTextAsync(context.Response, 200, "Rating confirmed");
-        }
-
-        private async Task<int?> AuthenticateAsync(HttpListenerRequest request, HttpListenerResponse response)
-        {
-            var authHeader = request.Headers["Authorization"];
-            if (string.IsNullOrWhiteSpace(authHeader) || !authHeader.StartsWith("Bearer "))
-            {
-                await HttpHelper.WriteTextAsync(response, 401, "Unauthorized: missing token");
-                return null;
-            }
-
-            var token = authHeader.Substring("Bearer ".Length).Trim();
-            var userData = _jwtService.ValidateToken(token);
-            if (userData == null)
-            {
-                await HttpHelper.WriteTextAsync(response, 401, "Unauthorized: Invalid token");
-                return null;
-            }
-  
-            return userData.Value.UserId;
-        }
-
-        private static int? ExtractId(string path)
-        {
-            var parts = path.Trim('/').Split('/');
-
-            if (parts.Length < 3)
-            {
-                return null;
-            }
-
-            return int.TryParse(parts[2], out var id) ? id : null;
         }
 
         private static Genres ParseGenre(string genre) => genre.ToLower() switch
