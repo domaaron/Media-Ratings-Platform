@@ -72,8 +72,51 @@ namespace MediaRatings.Api.controllers
 
         public async Task GetAllMediaAsync(HttpListenerContext context)
         {
-            var entries = _mediaManager.GetAllMediaEntries().OfType<MediaEntry>().Select(entry => new
+            var query = context.Request.QueryString;
+
+            var search = query["title"] ?? query["search"];
+            var genre = query["genre"];
+            var mediaType = query["mediaType"] ?? query["type"];
+            var minYear = int.TryParse(query["releaseYearMin"], out var minY) ? minY : (int?)null;
+            var maxYear = int.TryParse(query["releaseYearMax"], out var maxY) ? maxY : (int?)null;
+
+            var entries = _mediaManager.GetAllMediaEntries().OfType<MediaEntry>();
+
+            if (!string.IsNullOrWhiteSpace(search))
             {
+                entries = entries.Where(m =>
+                    m.Title.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                    (!string.IsNullOrWhiteSpace(m.Description) && m.Description.Contains(search, StringComparison.OrdinalIgnoreCase))
+                );
+            }
+
+            if (!string.IsNullOrWhiteSpace(mediaType))
+            {
+                entries = entries.Where(m =>
+                    m.MediaType.ToString().Equals(mediaType, StringComparison.OrdinalIgnoreCase)
+                );
+            }
+
+            if (!string.IsNullOrWhiteSpace(genre))
+            {
+                entries = entries.Where(m =>
+                    m.Genres.Any(g => g.ToString().ToLower() == genre.ToLower().Replace("-", "")) // SciFi == scifi
+                );
+            }
+
+            if (minYear.HasValue)
+            {
+                entries = entries.Where(m => m.ReleaseYear >= minYear.Value);
+            }
+
+            if (maxYear.HasValue)
+            {
+                entries = entries.Where(m => m.ReleaseYear <= maxYear.Value);
+            }
+
+            var result = entries.Select(entry => new
+            {
+                entry.MediaId,
                 entry.Title,
                 entry.Description,
                 MediaType = entry.MediaType.ToString().ToLower(),
@@ -81,7 +124,8 @@ namespace MediaRatings.Api.controllers
                 Genres = entry.Genres.Select(g => g.ToString().ToLower()).ToList(),
                 entry.AgeRestriction
             });
-            await HttpHelper.WriteJsonAsync(context.Response, 200, entries);
+
+            await HttpHelper.WriteJsonAsync(context.Response, 200, result);
         }
 
         public async Task GetMediaByIdAsync(HttpListenerContext context)

@@ -43,12 +43,7 @@ namespace MediaRatings.Domain.services
             if (existing == null)
                 return false;
 
-            existing.Title = mediaDto.Title;
-            existing.Description = mediaDto.Description;
-            existing.ReleaseYear = mediaDto.ReleaseYear;
-            existing.AgeRestriction = mediaDto.AgeRestriction;
-
-            existing.Genres = mediaDto.Genres.Select(g => g.ToLower() switch
+            var updatedGenres = mediaDto.Genres.Select(g => g.ToLower() switch
             {
                 "action" => Genres.Action,
                 "thriller" => Genres.Thriller,
@@ -61,8 +56,24 @@ namespace MediaRatings.Domain.services
                 _ => Genres.Unknown
             }).ToList();
 
-            return _repository.UpdateMediaEntry(existing);
+            MediaEntry updated = mediaDto.MediaType?.ToLower() switch
+            {
+                "movie" => new Movie(existing.CreatedBy, mediaDto.Title, mediaDto.Description, mediaDto.ReleaseYear, updatedGenres, mediaDto.AgeRestriction, existing.MediaId),
+                "series" => new Series(existing.CreatedBy, mediaDto.Title, mediaDto.Description, mediaDto.ReleaseYear, updatedGenres, mediaDto.AgeRestriction, existing.MediaId),
+                "game" => new Game(existing.CreatedBy, mediaDto.Title, mediaDto.Description, mediaDto.ReleaseYear, updatedGenres, mediaDto.AgeRestriction, existing.MediaId),
+                _ => existing
+            };
+
+            // transfer old ratings and favorites
+            foreach (var rating in existing.Ratings)
+                updated.AddRating(rating);
+
+            foreach (var userId in existing.FavoritedBy)
+                updated.AddFavorite(userId);
+
+            return _repository.UpdateMediaEntry(updated);
         }
+
 
         public int CountMediaEntries()
         {

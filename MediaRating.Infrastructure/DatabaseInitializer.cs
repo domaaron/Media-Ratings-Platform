@@ -22,105 +22,108 @@ namespace MediaRatings.Infrastructure
             using var connection = new NpgsqlConnection(_connectionString);
             connection.Open();
 
-            CreateUserTable(connection);
-            CreateMediaTable(connection);
-            CreateRatingsTable(connection);
-            CreateFavoritesTable(connection);
+            // drop & create tables
+            using var cmd = new NpgsqlCommand(@"
+            DROP TABLE IF EXISTS media_genres CASCADE;
+            DROP TABLE IF EXISTS favorites CASCADE;
+            DROP TABLE IF EXISTS ratings CASCADE;
+            DROP TABLE IF EXISTS media CASCADE;
+            DROP TABLE IF EXISTS users CASCADE;
 
-            SeedInitialData(connection);
-        }
+            CREATE TABLE users (
+                id SERIAL PRIMARY KEY,
+                username TEXT UNIQUE NOT NULL,
+                password_hash TEXT NOT NULL,
+                email TEXT,
+                favorite_genre TEXT
+            );
 
-        private void CreateUserTable(NpgsqlConnection connection)
-        {
-            var sql = @"
-                CREATE TABLE IF NOT EXISTS users (
-                    id SERIAL PRIMARY KEY,
-                    username TEXT UNIQUE NOT NULL,
-                    password_hash TEXT NOT NULL,
-                    email TEXT,
-                    favorite_genre TEXT
-                );";
+            CREATE TABLE media (
+                id SERIAL PRIMARY KEY,
+                title TEXT NOT NULL,
+                description TEXT,
+                media_type TEXT NOT NULL,
+                release_year INT,
+                age_restriction INT,
+                creator_user_id INT REFERENCES users(id) ON DELETE CASCADE
+            );
 
-            using var cmd = new NpgsqlCommand(sql, connection);
+            CREATE TABLE ratings (
+                id SERIAL PRIMARY KEY,
+                stars INT CHECK (stars BETWEEN 1 AND 5),
+                comment TEXT,
+                is_confirmed BOOLEAN DEFAULT FALSE,
+                created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+                user_id INT REFERENCES users(id) ON DELETE CASCADE,
+                media_id INT REFERENCES media(id) ON DELETE CASCADE
+            );
+
+            CREATE TABLE favorites (
+                user_id INT REFERENCES users(id) ON DELETE CASCADE,
+                media_id INT REFERENCES media(id) ON DELETE CASCADE,
+                PRIMARY KEY (user_id, media_id)
+            );
+
+            CREATE TABLE media_genres (
+                media_id INT REFERENCES media(id) ON DELETE CASCADE,
+                genre TEXT NOT NULL,
+                PRIMARY KEY (media_id, genre)
+            );
+            ", connection);
             cmd.ExecuteNonQuery();
-        }
 
-        private void CreateMediaTable(NpgsqlConnection connection)
-        {
-            var sql = @"
-                CREATE TABLE IF NOT EXISTS media (
-                    id SERIAL PRIMARY KEY,
-                    title TEXT NOT NULL,
-                    description TEXT,
-                    media_type TEXT NOT NULL,
-                    release_year INT,
-                    age_restriction INT,
-                    creator_user_id INT REFERENCES users(id) ON DELETE CASCADE
-                );";
+            // seed Users
+            using var insertUserCmd = new NpgsqlCommand(@"
+            INSERT INTO users (username, password_hash, email, favorite_genre)
+            VALUES (@username, @password, @email, @genre)
+            RETURNING id;
+            ", connection);
 
-            using var cmd = new NpgsqlCommand(sql, connection);
-            cmd.ExecuteNonQuery();
-        }
+            insertUserCmd.Parameters.AddWithValue("username", "admin");
+            insertUserCmd.Parameters.AddWithValue("password", PasswordHasher.HashPassword("admin123"));
+            insertUserCmd.Parameters.AddWithValue("email", DBNull.Value);
+            insertUserCmd.Parameters.AddWithValue("genre", DBNull.Value);
+            var userId = (int)insertUserCmd.ExecuteScalar();
 
-        private void CreateRatingsTable(NpgsqlConnection connection)
-        {
-            var sql = @"
-                CREATE TABLE IF NOT EXISTS ratings (
-                    id SERIAL PRIMARY KEY,
-                    stars INT CHECK (stars BETWEEN 1 AND 5),
-                    comment TEXT,
-                    is_confirmed BOOLEAN DEFAULT FALSE,
-                    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-                    user_id INT REFERENCES users(id) ON DELETE CASCADE,
-                    media_id INT REFERENCES media(id) ON DELETE CASCADE
-                );";
-
-            using var cmd = new NpgsqlCommand(sql, connection);
-            cmd.ExecuteNonQuery();
-        }
-
-        private void CreateFavoritesTable(NpgsqlConnection connection)
-        {
-            var sql = @"
-                CREATE TABLE IF NOT EXISTS favorites (
-                    user_id INT REFERENCES users(id) ON DELETE CASCADE,
-                    media_id INT REFERENCES media(id) ON DELETE CASCADE,
-                    PRIMARY KEY (user_id, media_id)
-                );";
-
-            using var cmd = new NpgsqlCommand(sql, connection);
-            cmd.ExecuteNonQuery();
-        }
-
-        private void SeedInitialData(NpgsqlConnection connection)
-        {
-            var checkCmd = new NpgsqlCommand("SELECT COUNT(*) from users;", connection);
-            var userCount = (long)checkCmd.ExecuteScalar();
-
-            if (userCount > 0)
+            // seed media entries + genres
+            var mediaEntries = new List<(string Title, string Description, string Type, int Year, int Age, string[] Genres)>
             {
-                return;
-            }
+                ("Avatar: Fire and Ash", "blue people", "Movie", 2025, 12, new [] { "animation", "adventure" }),
+                ("Fínal Fantasy VII", "Fantasy RPG", "Game", 1997, 12, new [] { "fantasy" }),
+                ("Inception", "Sci-fi thriller", "Movie", 2010, 12, new [] { "sci-fi" })
+            };
 
-            var insertUserSql = @"
-                INSERT INTO users (username, password_hash, email, favorite_genre)
-                VALUES (@username, @password, @email, @genre);";
-
-            using var insertCmd = new NpgsqlCommand(insertUserSql, connection);
-            insertCmd.Parameters.AddWithValue("username", "admin");
-            insertCmd.Parameters.AddWithValue("password", PasswordHasher.HashPassword("admin123"));
-            insertCmd.Parameters.AddWithValue("email", DBNull.Value);
-            insertCmd.Parameters.AddWithValue("favorite_genre", DBNull.Value);
-            insertCmd.ExecuteNonQuery();
-
-            var insertMediaSql = @"
+            foreach (var media in mediaEntries)
+            {
+                var mediaId = (int)new NpgsqlCommand(@"
                 INSERT INTO media (title, description, media_type, release_year, age_restriction, creator_user_id)
-                VALUES 
-                    ('Avatar: Fire and Ash', 'blue people', 'Movie', 2025, 12, 1),
-                    ('Fínal Fantasy VII', 'Fantasy RPG', 'Game', 1997, 12, 1);";
+                VALUES (@title, @desc, @type, @year, @age, @creator)
+                RETURNING id;
+                ", connection)
+                {
+                    Parameters =
+                {
+                    new NpgsqlParameter("title", media.Title),
+                    new NpgsqlParameter("desc", media.Description),
+                    new NpgsqlParameter("type", media.Type),
+                    new NpgsqlParameter("year", media.Year),
+                    new NpgsqlParameter("age", media.Age),
+                    new NpgsqlParameter("creator", userId)
+                }}
+                .ExecuteScalar();
 
-            using var mediaCmd = new NpgsqlCommand(insertMediaSql, connection);
-            mediaCmd.ExecuteNonQuery();
+                foreach (var genre in media.Genres)
+                {
+                    using var genreCmd = new NpgsqlCommand(@"
+                    INSERT INTO media_genres (media_id, genre)
+                    VALUES (@id, @genre);
+                    ", connection);
+                    genreCmd.Parameters.AddWithValue("id", mediaId);
+                    genreCmd.Parameters.AddWithValue("genre", genre);
+                    genreCmd.ExecuteNonQuery();
+                }
+            }
         }
     }
+
 }

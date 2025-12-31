@@ -47,7 +47,18 @@ namespace MediaRatings.Infrastructure.repositories
             cmd.Parameters.AddWithValue("age", media.AgeRestriction);
             cmd.Parameters.AddWithValue("creator", media.CreatedBy);
 
-            return (int)cmd.ExecuteScalar();
+            var mediaId = (int)cmd.ExecuteScalar();
+
+            // save genres
+            foreach (var genre in media.Genres)
+            {
+                using var genreCmd = new NpgsqlCommand("INSERT INTO media_genres (media_id, genre) VALUES (@mediaId, @genre)", connection);
+                genreCmd.Parameters.AddWithValue("mediaId", mediaId);
+                genreCmd.Parameters.AddWithValue("genre", genre.ToString().ToLower());
+                genreCmd.ExecuteNonQuery();
+            }
+
+            return mediaId;
         }
 
         public IMediaEntry? GetMediaById(int mediaId)
@@ -60,95 +71,146 @@ namespace MediaRatings.Infrastructure.repositories
             cmd.Parameters.AddWithValue("id", mediaId);
 
             using var reader = cmd.ExecuteReader();
-            if (reader.Read())
+            if (!reader.Read())
             {
-                var mediaType = reader.GetString(reader.GetOrdinal("media_type")).ToLower();
-                IMediaEntry entry = mediaType switch
-                {
-                    "movie" => new Movie(
-                        reader.GetInt32(reader.GetOrdinal("creator_user_id")),
-                        reader.GetString(reader.GetOrdinal("title")),
-                        reader.GetString(reader.GetOrdinal("description")),
-                        reader.GetInt32(reader.GetOrdinal("release_year")),
-                        new List<Genres>(),
-                        reader.GetInt32(reader.GetOrdinal("age_restriction")),
-                        reader.GetInt32(reader.GetOrdinal("id")) // MediaId setzen
-                    ),
-                    "series" => new Series(
-                        reader.GetInt32(reader.GetOrdinal("creator_user_id")),
-                        reader.GetString(reader.GetOrdinal("title")),
-                        reader.GetString(reader.GetOrdinal("description")),
-                        reader.GetInt32(reader.GetOrdinal("release_year")),
-                        new List<Genres>(),
-                        reader.GetInt32(reader.GetOrdinal("age_restriction")),
-                        reader.GetInt32(reader.GetOrdinal("id"))
-                    ),
-                    "game" => new Game(
-                        reader.GetInt32(reader.GetOrdinal("creator_user_id")),
-                        reader.GetString(reader.GetOrdinal("title")),
-                        reader.GetString(reader.GetOrdinal("description")),
-                        reader.GetInt32(reader.GetOrdinal("release_year")),
-                        new List<Genres>(),
-                        reader.GetInt32(reader.GetOrdinal("age_restriction")),
-                        reader.GetInt32(reader.GetOrdinal("id"))
-                    ),
-                    _ => throw new InvalidOperationException("Unknown media type")
-                };
-
-                return entry;
+                return null;
             }
 
-            return null;
-        }
+            var creatorId = reader.GetInt32(reader.GetOrdinal("creator_user_id"));
+            var title = reader.GetString(reader.GetOrdinal("title"));
+            var description = reader.GetString(reader.GetOrdinal("description"));
+            var releaseYear = reader.GetInt32(reader.GetOrdinal("release_year"));
+            var ageRestriction = reader.GetInt32(reader.GetOrdinal("age_restriction"));
+            var id = reader.GetInt32(reader.GetOrdinal("id"));
+            var mediaType = reader.GetString(reader.GetOrdinal("media_type")).ToLower();
 
+            // keep connection for genres open, so close reader first
+            reader.Close();
+
+            // load genres
+            var genres = new List<Genres>();
+            using (var genreCmd = new NpgsqlCommand("SELECT genre FROM media_genres WHERE media_id = @id", connection))
+            {
+                genreCmd.Parameters.AddWithValue("id", mediaId);
+                using var genreReader = genreCmd.ExecuteReader();
+                while (genreReader.Read())
+                {
+                    var genreStr = genreReader.GetString(0).ToLower();
+                    genres.Add(genreStr switch
+                    {
+                        "action" => Genres.Action,
+                        "adventure" => Genres.Adventure,
+                        "animation" => Genres.Animation,
+                        "comedy" => Genres.Comedy,
+                        "drama" => Genres.Drama,
+                        "horror" => Genres.Horror,
+                        "sci-fi" or "scifi" => Genres.SciFi,
+                        "fantasy" => Genres.Fantasy,
+                        "thriller" => Genres.Thriller,
+                        "documentary" => Genres.Documentary,
+                        "romance" => Genres.Romance,
+                        _ => Genres.Unknown
+                    });
+                }
+            }
+
+            return mediaType switch
+            {
+                "movie" => new Movie(
+                    creatorId,
+                    title,
+                    description,
+                    releaseYear,
+                    genres,
+                    ageRestriction,
+                    id
+                ),
+                "series" => new Series(
+                    creatorId,
+                    title,
+                    description,
+                    releaseYear,
+                    genres,
+                    ageRestriction,
+                    id
+                ),
+                "game" => new Game(
+                    creatorId,
+                    title,
+                    description,
+                    releaseYear,
+                    genres,
+                    ageRestriction,
+                    id
+                ),
+                _ => throw new InvalidOperationException("Unknown media type")
+            };
+        }
 
         public IReadOnlyCollection<IMediaEntry> GetAllMedia()
         {
-            var list = new List<IMediaEntry>();
+            var mediaDictionary = new Dictionary<int, (int creatorId, string title, string description, string mediaType, int releaseYear, int ageRestriction, List<Genres> genres)>();
 
             using var connection = new NpgsqlConnection(_connectionString);
             connection.Open();
 
             var sql = @"
-                SELECT id, title, description, media_type, release_year, age_restriction, creator_user_id
-                FROM media";
+                SELECT m.id, m.title, m.description, m.media_type, m.release_year, m.age_restriction, m.creator_user_id,
+                       mg.genre
+                FROM media m
+                LEFT JOIN media_genres mg ON m.id = mg.media_id
+                ORDER BY m.id";
 
             using var cmd = new NpgsqlCommand(sql, connection);
             using var reader = cmd.ExecuteReader();
 
             while (reader.Read())
             {
-                var mediaType = reader.GetString(reader.GetOrdinal("media_type")).ToLower();
+                int mediaId = reader.GetInt32(reader.GetOrdinal("id"));
+                int creatorId = reader.GetInt32(reader.GetOrdinal("creator_user_id"));
+                string title = reader.GetString(reader.GetOrdinal("title"));
+                string description = reader.GetString(reader.GetOrdinal("description"));
+                string mediaType = reader.GetString(reader.GetOrdinal("media_type")).ToLower();
+                int releaseYear = reader.GetInt32(reader.GetOrdinal("release_year"));
+                int ageRestriction = reader.GetInt32(reader.GetOrdinal("age_restriction"));
+                string? genreStr = reader.IsDBNull(reader.GetOrdinal("genre")) ? null : reader.GetString(reader.GetOrdinal("genre"))?.ToLower();
 
-                IMediaEntry entry = mediaType switch
+                if (!mediaDictionary.ContainsKey(mediaId))
                 {
-                    "movie" => new Movie(
-                        reader.GetInt32(reader.GetOrdinal("creator_user_id")),
-                        reader.GetString(reader.GetOrdinal("title")),
-                        reader.GetString(reader.GetOrdinal("description")),
-                        reader.GetInt32(reader.GetOrdinal("release_year")),
-                        new List<Genres>(), // Genres ggf. noch aus DB holen
-                        reader.GetInt32(reader.GetOrdinal("age_restriction")),
-                        reader.GetInt32(reader.GetOrdinal("id"))
-                    ),
-                    "series" => new Series(
-                        reader.GetInt32(reader.GetOrdinal("creator_user_id")),
-                        reader.GetString(reader.GetOrdinal("title")),
-                        reader.GetString(reader.GetOrdinal("description")),
-                        reader.GetInt32(reader.GetOrdinal("release_year")),
-                        new List<Genres>(),
-                        reader.GetInt32(reader.GetOrdinal("age_restriction")),
-                        reader.GetInt32(reader.GetOrdinal("id"))
-                    ),
-                    "game" => new Game(
-                        reader.GetInt32(reader.GetOrdinal("creator_user_id")),
-                        reader.GetString(reader.GetOrdinal("title")),
-                        reader.GetString(reader.GetOrdinal("description")),
-                        reader.GetInt32(reader.GetOrdinal("release_year")),
-                        new List<Genres>(),
-                        reader.GetInt32(reader.GetOrdinal("age_restriction")),
-                        reader.GetInt32(reader.GetOrdinal("id"))
-                    ),
+                    mediaDictionary[mediaId] = (creatorId, title, description, mediaType, releaseYear, ageRestriction, new List<Genres>());
+                }
+
+                if (!string.IsNullOrEmpty(genreStr))
+                {
+                    mediaDictionary[mediaId].genres.Add(genreStr switch
+                    {
+                        "action" => Genres.Action,
+                        "adventure" => Genres.Adventure,
+                        "animation" => Genres.Animation,
+                        "comedy" => Genres.Comedy,
+                        "drama" => Genres.Drama,
+                        "horror" => Genres.Horror,
+                        "sci-fi" or "scifi" => Genres.SciFi,
+                        "fantasy" => Genres.Fantasy,
+                        "thriller" => Genres.Thriller,
+                        "documentary" => Genres.Documentary,
+                        "romance" => Genres.Romance,
+                        _ => Genres.Unknown
+                    });
+                }
+            }
+
+            var list = new List<IMediaEntry>();
+            foreach (var kvp in mediaDictionary)
+            {
+                var id = kvp.Key;
+                var data = kvp.Value;
+
+                IMediaEntry entry = data.mediaType switch
+                {
+                    "movie" => new Movie(data.creatorId, data.title, data.description, data.releaseYear, data.genres, data.ageRestriction, id),
+                    "series" => new Series(data.creatorId, data.title, data.description, data.releaseYear, data.genres, data.ageRestriction, id),
+                    "game" => new Game(data.creatorId, data.title, data.description, data.releaseYear, data.genres, data.ageRestriction, id),
                     _ => throw new InvalidOperationException("Unknown media type")
                 };
 
@@ -180,6 +242,20 @@ namespace MediaRatings.Infrastructure.repositories
             cmd.Parameters.AddWithValue("year", media.ReleaseYear);
             cmd.Parameters.AddWithValue("age", media.AgeRestriction);
             cmd.Parameters.AddWithValue("id", media.MediaId);
+
+            // synchronize genres
+            using var delCmd = new NpgsqlCommand("DELETE FROM media_genres WHERE media_id = @id", connection);
+            delCmd.Parameters.AddWithValue("id", media.MediaId);
+            delCmd.ExecuteNonQuery();
+
+            foreach (var genre in media.Genres)
+            {
+                using var genreCmd = new NpgsqlCommand("INSERT INTO media_genres (media_id, genre) VALUES (@id, @genre)", connection);
+                genreCmd.Parameters.AddWithValue("id", media.MediaId);
+                genreCmd.Parameters.AddWithValue("genre", genre.ToString().ToLower());
+                genreCmd.ExecuteNonQuery();
+            }
+
 
             return cmd.ExecuteNonQuery() > 0;
         }
