@@ -8,7 +8,7 @@ namespace MediaRatings.Domain
         public int CreatedBy { get; private set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        public MediaType MediaType { get; protected set; }
+        public MediaType MediaType { get; set; }
         public int ReleaseYear { get; set; }
         public List<Genres> Genres { get; set; } = new List<Genres>();
         public int AgeRestriction { get; set; }
