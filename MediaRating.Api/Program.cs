@@ -54,6 +54,9 @@ router.Register("POST", "/api/users/login", authController.LoginAsync);
 
 // profile
 router.Register("GET", "/api/users/{id}/profile", userController.GetProfileAsync);
+router.Register("GET", "/api/users/{id}/ratings", userController.GetRatingHistoryAsync);
+router.Register("GET", "/api/users/{id}/favorites", userController.GetFavoritesAsync);
+router.Register("PUT", "/api/users/{id}/profile", userController.UpdateProfileAsync);
 
 // media management
 router.Register("POST", "/api/media", mediaController.CreateMediaAsync);
