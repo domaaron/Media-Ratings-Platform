@@ -22,7 +22,7 @@ namespace MediaRatings.Infrastructure.repositories
             await connection.OpenAsync();
 
             var cmd = new NpgsqlCommand(
-                "SELECT id, username, password_hash FROM users WHERE username = @u",
+                "SELECT id, username, password_hash, email, favorite_genre FROM users WHERE username = @u",
                 connection
             );
             cmd.Parameters.AddWithValue("u", username ?? throw new ArgumentNullException(nameof(username)));
@@ -43,6 +43,9 @@ namespace MediaRatings.Infrastructure.repositories
             typeof(UserAccount)
                 .GetProperty(nameof(UserAccount.UserId))!
                 .SetValue(user, reader.GetInt32(0));
+
+            user.Email = reader.IsDBNull(3) ? null : reader.GetString(3);
+            user.FavoriteGenre = reader.IsDBNull(4) ? null : reader.GetString(4);
 
             return user;
         }
@@ -115,6 +118,25 @@ namespace MediaRatings.Infrastructure.repositories
                 .SetValue(user, reader.GetInt32(0));
 
             return user;
+        }
+
+        public async Task UpdateProfileAsync(UserAccount user)
+        {
+            await using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            var cmd = new NpgsqlCommand(
+                @"UPDATE users
+                SET email = @e, favorite_genre = @g
+                WHERE id = @id",
+                connection
+            );
+
+            cmd.Parameters.AddWithValue("e", (object?)user.Email ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("g", (object?)user.FavoriteGenre ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("id", user.UserId);
+
+            await cmd.ExecuteNonQueryAsync();
         }
 
         // not necessary for this project, only implemented for the database exercises
