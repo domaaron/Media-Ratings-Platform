@@ -36,7 +36,9 @@ namespace MediaRatings.Infrastructure
                 CREATE TABLE IF NOT EXISTS users (
                     id SERIAL PRIMARY KEY,
                     username TEXT UNIQUE NOT NULL,
-                    password_hash TEXT NOT NULL
+                    password_hash TEXT NOT NULL,
+                    email TEXT,
+                    favorite_genre TEXT
                 );";
 
             using var cmd = new NpgsqlCommand(sql, connection);
@@ -101,12 +103,14 @@ namespace MediaRatings.Infrastructure
             }
 
             var insertUserSql = @"
-                INSERT INTO users (username, password_hash)
-                VALUES (@username, @password);";
+                INSERT INTO users (username, password_hash, email, favorite_genre)
+                VALUES (@username, @password, @email, @genre);";
 
             using var insertCmd = new NpgsqlCommand(insertUserSql, connection);
             insertCmd.Parameters.AddWithValue("username", "admin");
             insertCmd.Parameters.AddWithValue("password", PasswordHasher.HashPassword("admin123"));
+            insertCmd.Parameters.AddWithValue("email", DBNull.Value);
+            insertCmd.Parameters.AddWithValue("favorite_genre", DBNull.Value);
             insertCmd.ExecuteNonQuery();
 
             var insertMediaSql = @"

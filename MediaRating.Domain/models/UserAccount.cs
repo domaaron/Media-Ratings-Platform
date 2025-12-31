@@ -41,6 +41,8 @@ namespace MediaRatings.Domain
         public int UserId { get; private set; }
         public string Username { get; set; }
         public string Password { get; set; }
+        public string? Email { get; set; }
+        public string? FavoriteGenre { get; set; }
 
         // services
         public IMediaManager MediaManager { get; private set; }
