@@ -48,5 +48,6 @@ namespace MediaRatings.Domain
         int ReleaseYear { get; set; }
         List<Genres> Genres { get; set; }
         int AgeRestriction { get; set; }
+        double AverageRating();
     }
 }
