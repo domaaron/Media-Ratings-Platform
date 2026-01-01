@@ -19,13 +19,15 @@ namespace MediaRatings.Api.controllers
         private readonly UserRepository _userRepository;
         private readonly RatingManager _ratingManager;
         private readonly FavoritesManager _favoritesManager;
+        private readonly MediaManager _mediaManager;
 
-        public UserController(JwtService jwtService, UserRepository userRepository, RatingManager ratingManager, FavoritesManager favoritesManager)
+        public UserController(JwtService jwtService, UserRepository userRepository, RatingManager ratingManager, FavoritesManager favoritesManager, MediaManager mediaManager)
         {
             _jwtService = jwtService;
             _userRepository = userRepository;
             _ratingManager = ratingManager;
             _favoritesManager = favoritesManager;
+            _mediaManager = mediaManager;
         }
 
         public async Task GetProfileAsync(HttpListenerContext context)
@@ -175,6 +177,45 @@ namespace MediaRatings.Api.controllers
             });
         }
 
+        public async Task GetRecommendationsAsync(HttpListenerContext context)
+        {
+            var user = await AuthenticateAsync(context.Request);
+            if (user == null)
+            {
+                await HttpHelper.WriteTextAsync(context.Response, 401, "Unauthorized");
+                return;
+            }
+
+            var path = context.Request.Url.AbsolutePath;
+            var userIdString = path.Split("/")[3];
+
+            if (!int.TryParse(userIdString, out var userId) || userId != user.UserId)
+            {
+                await HttpHelper.WriteTextAsync(context.Response, 403, "Forbidden");
+                return;
+            }
+
+            var query = context.Request.QueryString["type"];
+
+            IEnumerable<IMediaEntry> recommendations = query switch
+            {
+                "genre" => await GetGenreRecommendations(user),
+                "content" => await GetContentRecommendations(user),
+                _ => Enumerable.Empty<IMediaEntry>()
+            };
+
+            var result = recommendations.Select(m => new
+            {
+                m.MediaId,
+                m.Title,
+                m.MediaType,
+                m.ReleaseYear,
+                Genres = m.Genres.Select(g => g.ToString())
+            });
+
+            await HttpHelper.WriteJsonAsync(context.Response, 200, result);
+        }
+
         private async Task<UserAccount?> AuthenticateAsync(HttpListenerRequest request)
         {
             var authHeader = request.Headers["Authorization"];
@@ -191,6 +232,50 @@ namespace MediaRatings.Api.controllers
             }
 
             return await _userRepository.FindByUsernameAsync(userData.Value.Username);
+        }
+
+        private async Task<IEnumerable<IMediaEntry>> GetGenreRecommendations(UserAccount user)
+        {
+            if (string.IsNullOrWhiteSpace(user.FavoriteGenre))
+            {
+                return Enumerable.Empty<IMediaEntry>();
+            }
+
+            var allMedia = _mediaManager.GetAllMediaEntries();
+
+            return allMedia
+                .Where(m => m.Genres.Any(g =>
+                    g.ToString().Equals(user.FavoriteGenre, StringComparison.OrdinalIgnoreCase)))
+                .OrderByDescending(m => m.AverageRating())
+                .Take(5);
+        }
+
+        private async Task<IEnumerable<IMediaEntry>> GetContentRecommendations(UserAccount user)
+        {
+            var ratedMedia = await _ratingManager.GetRatedMediaAsync(user.UserId);
+
+            if (!ratedMedia.Any())
+            {
+                return Enumerable.Empty<IMediaEntry>();
+            }
+
+            // preferred genres from previous reviews
+            var preferredGenres = ratedMedia
+                .SelectMany(m => m.Genres)
+                .GroupBy(g => g)
+                .OrderByDescending(g => g.Count())
+                .Select(g => g.Key)
+                .Take(3)
+                .ToList();
+
+            var allMedia = _mediaManager.GetAllMediaEntries();
+
+            return allMedia
+                .Where(m =>
+                    m.Genres.Any(g => preferredGenres.Contains(g)) &&
+                    !ratedMedia.Any(r => r.MediaId == m.MediaId))
+                .OrderByDescending(m => m.AverageRating())
+                .Take(5);
         }
     }
 }
