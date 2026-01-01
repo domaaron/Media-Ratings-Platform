@@ -139,6 +139,41 @@ namespace MediaRatings.Infrastructure.repositories
             await cmd.ExecuteNonQueryAsync();
         }
 
+        public async Task<List<UserAccount>> GetAllUsersAsync()
+        {
+            var users = new List<UserAccount>();
+
+            await using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            var cmd = new NpgsqlCommand(
+                "SELECT id, username, password_hash, email, favorite_genre FROM users",
+                connection
+            );
+
+            await using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                var user = new UserAccount(
+                    reader.GetString(1),    // username
+                    reader.GetString(2),     // password hash
+                    null!, null!, null!
+                );
+
+                // set ID
+                typeof(UserAccount)
+                    .GetProperty(nameof(UserAccount.UserId))!
+                    .SetValue(user, reader.GetInt32(0));
+
+                user.Email = reader.IsDBNull(3) ? null : reader.GetString(3);
+                user.FavoriteGenre = reader.IsDBNull(4) ? null : reader.GetString(4);
+
+                users.Add(user);
+            }
+
+            return users;
+        }
+
         // not necessary for this project, only implemented for the database exercises
         public async Task UpdatePasswordAsync(string username, string newPassword)
         {

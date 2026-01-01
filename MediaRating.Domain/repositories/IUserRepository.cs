@@ -12,5 +12,6 @@ namespace MediaRatings.Domain.repositories
         Task<UserAccount?> GetByIdAsync(int userId);
         Task<UserAccount> CreateAsync(string username, string passwordPlain);
         Task<bool> ValidateCredentialsAsync(string username, string passwordPlain);
+        Task<List<UserAccount>> GetAllUsersAsync();
     }
 }
