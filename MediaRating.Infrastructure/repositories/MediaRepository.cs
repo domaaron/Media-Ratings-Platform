@@ -238,7 +238,7 @@ namespace MediaRatings.Infrastructure.repositories
             using var cmd = new NpgsqlCommand(sql, connection);
             cmd.Parameters.AddWithValue("title", media.Title);
             cmd.Parameters.AddWithValue("desc", media.Description ?? "");
-            cmd.Parameters.AddWithValue("type", media.MediaType.ToString());
+            cmd.Parameters.AddWithValue("type", media.MediaType.ToString().ToLower());
             cmd.Parameters.AddWithValue("year", media.ReleaseYear);
             cmd.Parameters.AddWithValue("age", media.AgeRestriction);
             cmd.Parameters.AddWithValue("id", media.MediaId);
