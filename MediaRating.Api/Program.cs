@@ -44,6 +44,7 @@ var userController = new UserController(jwtService, userRepository, ratingManage
 var mediaController = new MediaController(mediaManager, jwtService, userRepository, ratingManager);
 var ratingController = new RatingController(ratingManager, mediaManager, userRepository, jwtService);
 var favoritesController = new FavoritesController(favoritesManager, jwtService);
+var leaderboardController = new LeaderboardController(ratingManager, userRepository);
 
 // router
 var router = new Router();
@@ -77,6 +78,9 @@ router.Register("POST", "/api/ratings/{ratingId}/confirm", ratingController.Conf
 // favorites management
 router.Register("POST", "/api/media/{id}/favorite", favoritesController.AddFavoriteAsync);
 router.Register("DELETE", "/api/media/{id}/favorite", favoritesController.RemoveFavoriteAsync);
+
+// leaderboard
+router.Register("GET", "/api/leaderboard", leaderboardController.GetLeaderboardAsync);
 
 // start http server
 var listener = new HttpListener();
