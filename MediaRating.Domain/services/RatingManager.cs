@@ -93,5 +93,15 @@ namespace MediaRatings.Domain.services
             return await _repository.GetRatingByIdAsync(ratingId);
         }
 
+        public async Task<IReadOnlyCollection<IMediaEntry>> GetRatedMediaAsync(int userId)
+        {
+            var ratings = await _repository.GetRatingByUserAsync(userId);
+
+            return ratings
+                .Select(r => r.MediaEntry)
+                .Distinct()
+                .ToList();
+        }
+
     }
 }
