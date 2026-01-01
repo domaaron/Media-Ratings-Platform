@@ -40,7 +40,7 @@ var ratingManager = new RatingManager(ratingRepository);
 
 // controllers
 var authController = new AuthController(authService);
-var userController = new UserController(jwtService, userRepository, ratingManager, favoritesManager);
+var userController = new UserController(jwtService, userRepository, ratingManager, favoritesManager, mediaManager);
 var mediaController = new MediaController(mediaManager, jwtService, userRepository, ratingManager);
 var ratingController = new RatingController(ratingManager, mediaManager, userRepository, jwtService);
 var favoritesController = new FavoritesController(favoritesManager, jwtService);
@@ -57,6 +57,9 @@ router.Register("GET", "/api/users/{id}/profile", userController.GetProfileAsync
 router.Register("GET", "/api/users/{id}/ratings", userController.GetRatingHistoryAsync);
 router.Register("GET", "/api/users/{id}/favorites", userController.GetFavoritesAsync);
 router.Register("PUT", "/api/users/{id}/profile", userController.UpdateProfileAsync);
+
+// recommendations
+router.Register("GET", "/api/users/{id}/recommendations", userController.GetRecommendationsAsync);
 
 // media management
 router.Register("POST", "/api/media", mediaController.CreateMediaAsync);
