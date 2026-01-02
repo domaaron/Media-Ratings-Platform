@@ -18,10 +18,32 @@ using System.Text.Json;
 // ------------------------------------------------
 
 // connection string for PostgreSQL database
-var connectionString = "Host=localhost;Database=mrp;Username=postgres;Password=1234";
+// testing locally
+//var connectionString = "Host=localhost;Database=mrp;Username=postgres;Password=1234";
+// using docker
+var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__Default")
+                       ?? "Host=postgres;Database=mrp;Username=postgres;Password=1234";
 
 // DB init
 var dbInitializer = new DatabaseInitializer(connectionString);
+//dbInitializer.Initialize();
+
+// warte auf DB
+var connected = false; 
+while (!connected) 
+{ 
+    try 
+    { 
+        using var conn = new Npgsql.NpgsqlConnection(connectionString); 
+        conn.Open(); 
+        connected = true; 
+    } 
+    catch 
+    { 
+        Console.WriteLine("Warte auf Datenbank..."); 
+        await Task.Delay(1000); 
+    } 
+} 
 dbInitializer.Initialize();
 
 // generate a secure random JWT secret (32 bytes = 256 bits)
@@ -84,7 +106,10 @@ router.Register("GET", "/api/leaderboard", leaderboardController.GetLeaderboardA
 
 // start http server
 var listener = new HttpListener();
-listener.Prefixes.Add("http://localhost:8080/");
+// testing locally
+//listener.Prefixes.Add("http://localhost:8080/");
+// using docker
+listener.Prefixes.Add("http://*:8080/");
 listener.Start();
 Console.WriteLine("Server läuft auf http://localhost:8080/");
 
