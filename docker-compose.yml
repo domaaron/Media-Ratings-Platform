@@ -11,5 +11,16 @@ services:
     volumes:
       - mrp_pgdata:/var/lib/postgresql
 
+  api:
+    build: .
+    container_name: mrp-api
+    depends_on:
+      - postgres
+    environment:
+      ConnectionStrings__Default: Host=postgres;Database=mrp;Username=postgres;Password=1234
+      JWT_SECRET: "w1o7Y6qU+3DfG5N9tVYv5gL8aVbJ2eFpZkT9lX4m3Qk="
+    ports:
+      - "8080:8080"
+
 volumes:
   mrp_pgdata:
