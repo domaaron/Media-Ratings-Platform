@@ -8,6 +8,15 @@ using System.Threading.Tasks;
 
 namespace MediaRatings.Api.Utils
 {
+    /*
+    Base class for all API controllers:
+        - Provides common JWT authentication functionality
+        - Validates Authorization Bearer tokens from HTTP requests
+        - Returns authenticated user's ID or appropriate HTTP error codes:
+            401 → Unauthorized (missing or invalid token)
+        - Provides utility method to extract integer IDs from URL paths
+        - Designed to reduce code duplication in concrete controllers
+    */
     public abstract class BaseController
     {
         protected readonly JwtService _jwtService;

@@ -10,6 +10,17 @@ using System.Threading.Tasks;
 
 namespace MediaRatings.Infrastructure.repositories
 {
+    /*
+    Repository for managing media entries in the database:
+        - Provides CRUD operations for media entries (movies, series, games)
+        - Methods:
+            • CreateMediaEntry(media) → inserts a new media entry, ensures unique title per media type, returns the new media ID
+            • GetMediaById(mediaId) → retrieves a single media entry by ID, including its genres
+            • GetAllMedia() → retrieves all media entries with associated genres
+            • UpdateMediaEntry(media) → updates media fields and synchronizes genres
+            • DeleteMediaEntry(mediaId) → deletes a media entry by ID
+        - Manages media genres in a separate "media_genres" table
+    */
     public class MediaRepository : IMediaRepository
     {
         private readonly string _connectionString;

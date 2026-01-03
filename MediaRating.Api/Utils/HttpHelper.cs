@@ -8,6 +8,11 @@ using System.Threading.Tasks;
 
 namespace MediaRatings.Api.Utils
 {
+    /*
+    Helper class for writing HTTP responses:
+        - Provides methods to send JSON or plain text responses
+        - Automatically sets HTTP status code and Content-Type header
+    */
     public class HttpHelper
     {
         public static async Task WriteJsonAsync(HttpListenerResponse response, int statusCode, object data)

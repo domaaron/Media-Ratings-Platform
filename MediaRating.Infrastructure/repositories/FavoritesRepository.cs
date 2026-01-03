@@ -10,6 +10,17 @@ using System.Threading.Tasks;
 
 namespace MediaRatings.Infrastructure.repositories
 {
+    /*
+    Repository for managing user favorites:
+        - Stores and retrieves favorite media entries for users in PostgreSQL
+        - Methods:
+            • AddFavoriteAsync(userId, mediaId) → adds a media entry to user's favorites
+            • RemoveFavoriteAsync(userId, mediaId) → removes a media entry from favorites
+            • GetFavoritesByUserAsync(userId) → retrieves all favorite media entries for a user
+            • IsFavoritesAsync(userId, mediaId) → checks if a media entry is favorited by a user
+        - Uses IMediaRepository to resolve media entries by ID
+        - Operates asynchronously and ensures database connections are properly opened/closed
+    */
     public class FavoritesRepository : IFavoritesRepository
     {
         private readonly string _connectionString;

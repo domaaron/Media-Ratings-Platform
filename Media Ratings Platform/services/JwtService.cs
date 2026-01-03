@@ -9,6 +9,15 @@ using System.Threading.Tasks;
 
 namespace Media_Ratings_Platform.services
 {
+    /*
+    JWT Service for authentication:
+        - Generates JSON Web Tokens (JWT)
+        - Tokens are signed using HMAC SHA256 with a secret key
+        - Tokens expire after 2 hours
+        - Validates incoming JWTs and extracts userId and username
+        - Returns null if token is missing, invalid, or expired
+        - Used by controllers to authenticate requests
+    */
     public class JwtService
     {
         private readonly string _secret;

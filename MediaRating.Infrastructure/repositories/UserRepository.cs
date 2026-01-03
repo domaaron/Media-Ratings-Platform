@@ -7,6 +7,20 @@ using System.Threading.Tasks;
 
 namespace MediaRatings.Infrastructure.repositories
 {
+    /*
+    Repository for managing user accounts in the database:
+        - Provides CRUD operations for UserAccount objects
+        - Methods:
+            • FindByUsernameAsync(username) → retrieves a user by username, returns null if not found
+            • CreateAsync(username, passwordPlain) → creates a new user with hashed password, throws if username exists
+            • ValidateCredentialsAsync(username, passwordPlain) → verifies username/password combination
+            • GetByIdAsync(userId) → retrieves a user by ID
+            • UpdateProfileAsync(user) → updates email and favorite genre
+            • GetAllUsersAsync() → retrieves all users
+            • UpdatePasswordAsync(username, newPassword) → updates password (for exercises)
+            • DeleteAsync(username) → deletes a user (for exercises)
+        - Passwords are hashed via PasswordHasher
+    */
     public class UserRepository : IUserRepository
     {
         private readonly string _connectionString;

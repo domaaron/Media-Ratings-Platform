@@ -10,6 +10,19 @@ using System.Threading.Tasks;
 
 namespace MediaRatings.Api.controllers
 {
+    /*
+    Manages a user's favorite media entries:
+        - Adds a media entry to the user's list of favorites
+        - Removes a media entry from the user's favorites
+        - Validates user authentication via JWT token
+        - Validates media IDs from the request path
+        - Returns appropriate HTTP status codes:
+            201 → successfully added
+            200 → successfully removed
+            400 → invalid media ID
+            404 → favorite not found
+            401 → unauthorized
+    */
     public class FavoritesController : BaseController
     {
         private readonly IFavoritesManager _favoritesManager;

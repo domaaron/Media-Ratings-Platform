@@ -9,6 +9,14 @@ using System.Threading.Tasks;
 
 namespace MediaRatings.Api
 {
+    /*
+    Router for handling HTTP requests:
+        - Registers routes with HTTP method, path, and handler function
+        - Matches incoming requests to registered routes
+        - Supports path parameters (e.g., /api/users/{id})
+        - Returns 404 if no route matches
+        - Catches exceptions and returns 500 server error
+    */
     public class Router
     {
         private readonly List<Route> _routes = new();

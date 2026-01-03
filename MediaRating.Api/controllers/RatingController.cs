@@ -13,6 +13,19 @@ using System.Threading.Tasks;
 
 namespace MediaRatings.Api.controllers
 {
+    /*
+    Handles all rating-related API actions:
+        - Allows authenticated users to rate media entries (1–5 stars) with optional comments
+        - Edit existing ratings (only by the creator)
+        - Like other users' ratings (max 1 like per rating, cannot like own rating)
+        - Confirm a rating to make it public (only by the rating creator)
+        - Validates input data and returns appropriate HTTP codes:
+            201 → rating created
+            200 → success
+            400 → bad request / invalid input
+            403 → forbidden (attempting actions on ratings not owned by user)
+            404 → not found (rating or media not found)
+    */
     public class RatingController : BaseController
     {
         private readonly IRatingManager _ratingManager;

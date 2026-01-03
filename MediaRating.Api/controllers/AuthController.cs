@@ -10,6 +10,16 @@ using System.Threading.Tasks;
 
 namespace MediaRatings.Api.controllers
 {
+    /*
+    Handles user authentication and registration:
+        - Registers new users with a username and password
+        - Authenticates existing users and returns a JWT token
+        - Validates input JSON and returns appropriate HTTP status codes:
+            201 → user created
+            400 → invalid JSON
+            401 → unauthorized
+            409 → username already exists
+    */
     public class AuthController
     {
         private readonly AuthService _authService;

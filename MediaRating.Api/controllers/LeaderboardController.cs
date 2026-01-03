@@ -10,6 +10,17 @@ using System.Threading.Tasks;
 
 namespace MediaRatings.Api.controllers
 {
+    /*
+    Provides a public leaderboard of top users:
+        - Fetches all users from the repository
+        - Calculates each user's average rating given and total number of ratings
+        - Sorts users by:
+            1. Average rating (descending)
+            2. Total ratings (descending)
+        - Returns the top 5 users as JSON
+        - HTTP response codes:
+            200 → successful retrieval of leaderboard
+    */
     public class LeaderboardController
     {
         private readonly RatingManager _ratingManager;

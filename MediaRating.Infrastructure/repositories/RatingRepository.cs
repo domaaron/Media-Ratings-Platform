@@ -11,6 +11,18 @@ using System.Threading.Tasks;
 
 namespace MediaRatings.Infrastructure.repositories
 {
+    /*
+    Repository for managing user ratings in the database:
+        - Provides CRUD operations for UserRating objects
+        - Methods:
+            • AddRatingAsync(rating) → inserts a new rating into the database, returns the new rating ID
+            • UpdateRatingAsync(rating) → updates an existing rating, including stars, comment, and confirmation status
+            • DeleteRatingAsync(ratingId) → deletes a rating by ID
+            • GetRatingByIdAsync(ratingId) → retrieves a single rating by ID
+            • GetRatingByUserAsync(userId) → retrieves all ratings by a specific user
+            • GetRatingByMediaAsync(mediaId) → retrieves all ratings for a specific media entry
+        - Relies on IMediaRepository and IUserRepository to fetch associated media and user objects
+    */
     public class RatingRepository : IRatingRepository
     {
         private readonly string _connectionString;

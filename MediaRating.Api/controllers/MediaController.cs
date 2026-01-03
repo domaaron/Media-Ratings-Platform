@@ -14,6 +14,24 @@ using System.Threading.Tasks;
 
 namespace MediaRatings.Api.controllers
 {
+    /*
+    Handles all media-related API actions:
+        - Create, read, update, and delete media entries (movies, series, games)
+        - Authenticate users before allowing modifications
+        - Filter and search media entries by:
+            - title/description
+            - genre
+            - type (movie, series, game)
+            - release year range
+        - Parse genres from string input
+        - Return structured JSON responses with appropriate HTTP codes:
+            201 → created
+            200 → success
+            204 → deleted successfully
+            400 → bad request / invalid input
+            403 → forbidden (user cannot modify another's entry)
+            404 → not found
+    */
     public class MediaController : BaseController
     {
         private readonly MediaManager _mediaManager;

@@ -13,6 +13,23 @@ using System.Threading.Tasks;
 
 namespace MediaRatings.Api.controllers
 {
+    /*
+    Handles all user-related API actions:
+        - Authenticates users via JWT tokens
+        - Provides user profile information and statistics
+        - Allows users to update their profile (email, favorite genre)
+        - Retrieves user's rating history
+        - Retrieves user's list of favorite media
+        - Provides personalized media recommendations based on:
+            - favorite genre
+            - previously rated media (content similarity)
+        - Validates input and authorization, returning appropriate HTTP codes:
+            200 → success
+            201 → created
+            400 → bad request / invalid input
+            401 → unauthorized (invalid or missing token)
+            403 → forbidden (attempting actions for another user)
+    */
     public class UserController
     {
         private readonly JwtService _jwtService;
