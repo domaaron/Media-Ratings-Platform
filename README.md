@@ -145,15 +145,57 @@ Be prepared with:
 
 ## 📂 Suggested Project Structure
 ```bash
-/src
+/MediaRatings.Api
   /controllers
+    AuthController.cs
+    FavoritesController.cs
+    LeaderboardController.cs
+    MediaController.cs
+    RatingController.cs
+    UserController.cs
+  /Utils
+    HttpHelper.cs
+    JsonHelper.cs
+  Program.cs
+  Router.cs
+
+/MediaRatings.Domain
   /models
-  /services
+    MediaEntry.cs
+    UserAccount.cs
+    UserRating.cs
+    Movie.cs
+    Series.cs
+    Game.cs
   /repositories
+    IMediaRepository.cs
+    IUserRepository.cs
+    IRatingRepository.cs
+  /services
+    IMediaManager.cs
+    IRatingManager.cs
+    IFavoritesManager.cs
+
+/MediaRatings.Infrastructure
+  /repositories
+    MediaRepository.cs
+    UserRepository.cs
+    RatingRepository.cs
+    FavoritesRepository.cs
+  /security
+    PasswordHasher.cs
+  DatabaseInitializer.cs
+  Database.cs
+
 /tests
   /unit
+    UserTests.cs
+    MediaTests.cs
+    RatingTests.cs
+
 /docs
   protocol.md
   postman_collection.json
+
 README.md
 ```
