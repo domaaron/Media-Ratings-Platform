@@ -7,6 +7,7 @@ using MediaRatings.Domain.repositories;
 using MediaRatings.Domain.services;
 using MediaRatings.Infrastructure;
 using MediaRatings.Infrastructure.repositories;
+using Npgsql;
 using System;
 using System.Net;
 using System.Security.Cryptography;
@@ -17,7 +18,33 @@ using System.Text.Json;
 // setup
 // ------------------------------------------------
 
-// connection string for PostgreSQL database
+// connection to the standard database "postgres" -> only for testing locally
+//var masterConnectionString = "Host=localhost;Database=postgres;Username=postgres;Password=1234";
+
+//using (var conn = new NpgsqlConnection(masterConnectionString))
+//{
+//    conn.Open();
+
+//    // check if DB "mrp" exists
+//    using var checkCmd = new NpgsqlCommand(
+//        "SELECT 1 FROM pg_database WHERE datname='mrp';", conn);
+//    var exists = checkCmd.ExecuteScalar();
+
+//    if (exists == null)
+//    {
+//        Console.WriteLine("Database 'mrp' does not exist – create...");
+//        using var createCmd = new NpgsqlCommand(
+//            "CREATE DATABASE mrp;", conn);
+//        createCmd.ExecuteNonQuery();
+//        Console.WriteLine("Database 'mrp' created.");
+//    }
+//    else
+//    {
+//        Console.WriteLine("Database 'mrp' already exists.");
+//    }
+//}
+
+// connection string for mrp database
 // testing locally
 //var connectionString = "Host=localhost;Database=mrp;Username=postgres;Password=1234";
 // using docker
@@ -29,21 +56,21 @@ var dbInitializer = new DatabaseInitializer(connectionString);
 //dbInitializer.Initialize();
 
 // warte auf DB
-var connected = false; 
-while (!connected) 
-{ 
-    try 
-    { 
-        using var conn = new Npgsql.NpgsqlConnection(connectionString); 
-        conn.Open(); 
-        connected = true; 
-    } 
-    catch 
-    { 
-        Console.WriteLine("Warte auf Datenbank..."); 
-        await Task.Delay(1000); 
-    } 
-} 
+var connected = false;
+while (!connected)
+{
+    try
+    {
+        using var conn = new Npgsql.NpgsqlConnection(connectionString);
+        conn.Open();
+        connected = true;
+    }
+    catch
+    {
+        Console.WriteLine("Warte auf Datenbank...");
+        await Task.Delay(1000);
+    }
+}
 dbInitializer.Initialize();
 
 // generate a secure random JWT secret (32 bytes = 256 bits)
