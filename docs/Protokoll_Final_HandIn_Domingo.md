@@ -230,7 +230,7 @@ nicht durchgeführt und die Zeiten wurden im Nachhinein realistisch geschätzt.
 | JWT Authentifizierung                     | 4 h         |
 | Controller & Routing                      | 6 h         |
 | Domain-Logik                              | 3 h         |
-| Unit Tests                                | 2 h         |
+| Unit Tests                                | 3 h         |
 | Docker & Deployment                       | 3 h         |
-| Debugging & Fehlerbehebung                | 5 h         |
-| **Gesamt**                                | **29 h**    |
+| Debugging & Fehlerbehebung                | 6 h         |
+| **Gesamt**                                | **31 h**    |
