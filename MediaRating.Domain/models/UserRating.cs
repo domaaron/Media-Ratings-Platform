@@ -28,10 +28,10 @@ namespace MediaRatings.Domain
             IsConfirmed = isConfirmed;
         }
 
-        public static UserRating Create(IMediaEntry media, UserAccount user, int stars, string? comment)
+        public static UserRating Create(IMediaEntry media, UserAccount user, int stars, string? comment, int ratingId)
         {
             return new UserRating(
-                0,
+                ratingId,
                 media,
                 user,
                 stars,

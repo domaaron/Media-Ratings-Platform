@@ -75,7 +75,7 @@ namespace MediaRatings.Api.controllers
                 return;
             }
 
-            var rating = UserRating.Create(mediaEntry, user, dto.Stars, dto.Comment);
+            var rating = UserRating.Create(mediaEntry, user, dto.Stars, dto.Comment, 0);
 
             await _ratingManager.AddRatingAsync(rating);
             await HttpHelper.WriteJsonAsync(context.Response, 201, new
