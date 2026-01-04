@@ -189,9 +189,12 @@ Be prepared with:
 
 /tests
   /unit
-    UserTests.cs
-    MediaTests.cs
+    UserAccountTest.cs
+    UserRatingTest.cs
     RatingTests.cs
+  /integration
+    DatabaseTest.cs
+    UserRepositoryTest.cs
 
 /docs
   protocol.md
